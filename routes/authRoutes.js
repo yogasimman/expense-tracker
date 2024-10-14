@@ -5,6 +5,8 @@ const isAuthenticated = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
+router.get('/',authController.index);
+
 router.get('/login', authController.loginPage);
 
 router.post('/login', [
@@ -15,5 +17,6 @@ router.post('/login', [
 router.get('/logout', authController.logout);
 
 router.get('/dashboard', isAuthenticated, authController.dashboardPage);
+router.get('/settings', isAuthenticated, authController.settings);
 
 module.exports = router;

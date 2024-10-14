@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Expense</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 40px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        .left-section, .right-section {
+            width: 48%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Upload Section Styling */
+        .upload-area {
+            padding: 30px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            text-align: center;
+            background-color: #f9f9f9;
+            transition: background 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background-color: #ecf0f1;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 15px 25px;
+            background-color: #1abc9c;
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #16a085;
+        }
+
+        #file-upload {
+            display: none;
+        }
+
+        /* Display Files */
+        .file-preview {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .file-preview div {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .file-preview img {
+            max-width: 150px; /* Adjust size as necessary */
+            max-height: 150px; /* Adjust size as necessary */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Expense Form Styling */
+        .expense-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+            border-color: #1abc9c;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* Submit Button Styling */
+        .submit-btn {
+            padding: 15px 25px;
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: 500;
+        }
+
+        .submit-btn:hover {
+            background-color: #16a085;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Create Expense Page -->
+    <div class="container">
+        <div class="left-section">
+            <h2>Upload Receipts</h2>
+            <div class="upload-area">
+                <input type="file" id="file-upload" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+                <label for="file-upload" class="upload-btn">Upload Receipt</label>
+                <div class="file-preview" id="file-preview"></div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <h2>Expense Details</h2>
+            <form action="#" method="POST" class="expense-form">
+                <div class="form-group">
+                    <label for="expense-title">Expense Title:</label>
+                    <input type="text" id="expense-title" name="expense-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select a Category</option>
+                        <option value="travel">Travel</option>
+                        <option value="food">Food</option>
+                        <option value="office-supplies">Office Supplies</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trips">Trips:</label>
+                    <select id="trips" name="trips">
+                        <option value="">Select a Trip</option>
+                        <option value="business-trip">Business Trip</option>
+                        <option value="conference-trip">Conference Trip</option>
+                        <option value="team-outing">Team Outing</option>
+                        <option value="client-visit">Client Visit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Submit Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('file-upload').addEventListener('change', function(event) {
+            const filePreview = document.getElementById('file-preview');
+            filePreview.innerHTML = ''; // Clear previous files
+
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                // Handle image files
+                if (file.type.startsWith('image/')) {
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result; // Set the source to the file data
+                        const div = document.createElement('div');
+                        div.appendChild(img);
+                        div.appendChild(document.createTextNode(file.name)); // Display file name
+                        filePreview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file); // Read the file as a data URL
+                } else {
+                    // Handle non-image files (PDF, Word, Excel)
+                    const div = document.createElement('div');
+                    const icon = document.createElement('span');
+                    icon.textContent = getFileIcon(file.type);
+                    icon.style.fontSize = '48px'; // Adjust size of the icon as needed
+                    div.appendChild(icon);
+                    div.appendChild(document.createTextNode(file.name)); // Display file name
+                    filePreview.appendChild(div);
+                }
+            }
+        });
+
+        function getFileIcon(fileType) {
+            // Return a character or icon based on the file type
+            if (fileType.startsWith('application/pdf')) {
+                return '📄'; // PDF icon
+            } else if (fileType.startsWith('application/vnd.openxmlformats-officedocument.wordprocessingml.document') || fileType.startsWith('application/msword')) {
+                return '📝'; // Word document icon
+            } else if (fileType.startsWith('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') || fileType.startsWith('application/vnd.ms-excel')) {
+                return '📊'; // Excel document icon
+            }
+            return '📁'; // Default file icon
+        }
+    </script>
+</body>
+</html>
