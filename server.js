@@ -8,11 +8,9 @@ const { body, validationResult } = require('express-validator');
 const app = express();
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/express-tracker', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+mongoose.connect('mongodb://localhost:27017/express-tracker')
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.log(err));
 
 // User schema
 const userSchema = new mongoose.Schema({
@@ -26,7 +24,7 @@ const User = mongoose.model('User', userSchema);
 
 // Middleware
 app.use(express.urlencoded({ extended: false }));
-app.set('view engine', 'ejs');
+
 
 // Session middleware
 app.use(session({
@@ -51,7 +49,7 @@ function isAuthenticated(req, res, next) {
 
 // Routes
 app.get('/login', (req, res) => {
-    res.render('login', { errors: [] });
+    res.render('login.ejs', { errors: [] });
 });
 
 app.post('/login', [

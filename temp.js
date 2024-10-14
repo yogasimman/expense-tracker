@@ -10,10 +10,14 @@ mongoose.connect('mongodb://localhost:27017/express-tracker', {
 
 // Define the User Schema
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true },
+    employee_id: { type: String, required: true, unique: true }, // Primary key
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, default: 'user' }
+    mobile: { type: String, required: true },
+    designation: { type: String, required: true },
+    department: { type: String, required: true },
+    role: { type: String, default: 'user' } // Optional, defaults to 'user'
 });
 
 const User = mongoose.model('User', userSchema);
@@ -32,16 +36,24 @@ const createUsers = async () => {
         // Create users
         const users = [
             {
-                username: 'admin',
+                employee_id: 'EMP001',
+                name: 'Admin User',
                 email: 'admin@example.com',
                 password: hashedAdminPassword,
+                mobile: '1234567890',
+                designation: 'Administrator',
+                department: 'Management',
                 role: 'admin',
             },
             {
-                username: 'user1',
+                employee_id: 'EMP002',
+                name: 'John Doe',
                 email: 'user1@example.com',
                 password: hashedUser1Password,
-                role: 'user',
+                mobile: '0987654321',
+                designation: 'Employee',
+                department: 'Finance',
+                role: 'submitter',
             }
         ];
 
