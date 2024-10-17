@@ -69,36 +69,14 @@ exports.dashboardPage = (req, res) => {
     res.render('dashboard', { name: name ,currentPath : req.url});
 };
 
-exports.settings = async (req,res) =>{
-    try{
-        const userId = req.session.user.id;
-        const user = await User.findById(userId).select('-password');
-
-        if(!user){
-            return res.redirect('/login');
-        }
-
-        res.render('settings',{
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department,
-            employeeId: user.employee_id,
-            mobile: user.mobile,
-            designation: user.designation,
-            currentPath: req.url
-        })
-    }catch(err){
-        console.error(err.message);
-        res.status(500).send("Server Error");
-    }
-}
 
 exports.index = (req,res) => { 
     if(req.session.isAuthenticated){
         const name = req.cookies.name;
-        res.render('index',{name: name, currentPath : req.url});
+        const role = req.cookies.role;
+        res.render('index',{name: name, currentPath : req.url, role: role});
     }else{
         return res.redirect('/login');
     }
 }
+

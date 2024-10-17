@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals | Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+     <!-- Optional Bootstrap Icons -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/approvals.css">
+    <link rel="stylesheet" href="/styles/sidebar.css">
+    <!-- FontAwesome for icons (you can include this in your project if needed) -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+     <!-- Sidebar -->
+    <%- include('./partials/sidebar.ejs') %>
+
+     <div class="main-content">
+        <div class="modal-header">
+            <h2><i class="bi bi-check2-square"></i> Approvals</h2>
+        </div>
+    <div class="container">
+        <!-- Tabs for Pending Approval, Trips, Reports -->
+        <div class="tabs">
+            <div class="tab active" id="tab-pending">
+                <i class="fas fa-hourglass-half"></i> Pending Approval
+            </div>
+            <div class="tab" id="tab-trips">
+                <i class="fas fa-briefcase"></i> Trips
+            </div>
+            <div class="tab" id="tab-reports">
+                <i class="fas fa-folder"></i> Reports
+            </div>
+        </div>
+
+        <!-- Table content for the Trips tab -->
+        <div id="trips-content" class="table-container" style="display: none;"> <!-- Initially hidden -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Submitter</th>
+                        <th>Trip #</th>
+                        <th>Trip Details</th>
+                        <th>Destination</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Doe</td>
+                        <td>12345</td>
+                        <td>Conference at XYZ</td>
+                        <td>New York</td>
+                        <td><span class="status-indicator status-approved">Approved</span></td>
+                    </tr>
+                    <!-- More rows can go here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty message when no trips are available -->
+        <div id="empty-message" class="empty-message">
+            No trips submitted for approval
+        </div>
+    </div>
+</div>
+
+    <script>
+        // JavaScript to handle tab switching
+        document.getElementById('tab-pending').addEventListener('click', function () {
+            setActiveTab('tab-pending');
+        });
+
+        document.getElementById('tab-trips').addEventListener('click', function () {
+            setActiveTab('tab-trips');
+        });
+
+        document.getElementById('tab-reports').addEventListener('click', function () {
+            setActiveTab('tab-reports');
+        });
+
+        function setActiveTab(tabId) {
+            var tabs = document.getElementsByClassName('tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'tab-pending') {
+                document.getElementById('trips-content').style.display = 'none';
+                document.getElementById('empty-message').style.display = 'block';
+                document.getElementById('empty-message').textContent = 'No trips submitted for approval';
+            } else if (tabId === 'tab-trips') {
+                document.getElementById('trips-content').style.display = 'block';
+                document.getElementById('empty-message').style.display = 'none';
+            } else if (tabId === 'tab-reports') {
+                document.getElementById('trips-content').style.display = 'none';
+                document.getElementById('empty-message').style.display = 'block';
+                document.getElementById('empty-message').textContent = 'No reports available';
+            }
+        }
+
+        // Initialize the view to show the correct content
+        setActiveTab('tab-pending'); // This sets the initial active tab and content on page load
+    </script>
+</body>
+</html>

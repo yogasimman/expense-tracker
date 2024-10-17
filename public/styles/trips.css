@@ -1,0 +1,68 @@
+.main-content {
+    margin-left: 240px; /* Space for the sidebar */
+}
+.trip-container {
+    background-color: #f9f9fb;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+}
+.trip-header h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    font-weight: 550;
+    color: #2c3e50;
+}
+.form-control, .form-select {
+    margin-bottom: 15px;
+}
+.trip-itinerary-header {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+.trip-itinerary-form {
+    margin-top: 20px;
+}
+.preferences-container {
+    margin-top: 20px;
+}
+.transport-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.plus-button {
+    cursor: pointer;
+    font-size: 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+.plus-button:hover {
+    background-color: #0056b3;
+}
+.hidden-section {
+    display: none;
+}
+.transport-icon {
+    font-size: 18px;
+    margin-right: 10px;
+}
+.disabled-option {
+    opacity: 0.5;
+    pointer-events: none;
+}

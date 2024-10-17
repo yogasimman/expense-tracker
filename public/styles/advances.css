@@ -1,0 +1,21 @@
+.main-content {
+    margin-left: 240px; /* Space for the sidebar */
+}
+
+.modal-header{
+    margin-top: -35px;
+}
+.modal-title{
+    margin-bottom: 20px;
+    font-size: 30px;
+    font-weight: 550;
+    color: #2c3e50;
+}
+
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #2c3e50;
+}

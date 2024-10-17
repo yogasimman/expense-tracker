@@ -1,0 +1,140 @@
+
+        .main-content {
+            margin-left: 240px; /* Space for the sidebar */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        .left-section, .right-section {
+            width: 48%;
+        }
+
+        .main-content h2 {
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Upload Section Styling */
+        .upload-area {
+            padding: 30px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            text-align: center;
+            background-color: #f9f9f9;
+            transition: background 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background-color: #ecf0f1;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 15px 25px;
+            background-color: #1abc9c;
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #16a085;
+        }
+
+        #file-upload {
+            display: none;
+        }
+
+        /* Display Files */
+        .file-preview {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .file-preview div {
+            margin-right: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .file-preview img {
+            max-width: 150px; /* Adjust size as necessary */
+            max-height: 150px; /* Adjust size as necessary */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Expense Form Styling */
+        .expense-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+            border-color: #1abc9c;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        /* Submit Button Styling */
+        .submit-btn {
+            padding: 15px 25px;
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: 500;
+        }
+
+        .submit-btn:hover {
+            background-color: #16a085;
+        }
