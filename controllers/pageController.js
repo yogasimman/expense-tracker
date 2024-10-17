@@ -1,4 +1,9 @@
 const User = require('../models/userModel');
+const Trip = require('../models/tripModel');
+const Expense = require('../models/expenseModel');
+const Category = require('../models/categoryModel');
+const Reports = require('../models/reportsModel');
+const Advances = require('../models/advancesModel');
 
 exports.settings = async (req,res) =>{
     try{
@@ -41,6 +46,7 @@ exports.trips = (req,res) =>{
         res.render('trips',{currentPath: req.url});
     }
 }
+
 
 exports.advances = (req,res) =>{
     if(req.session.user.role == "admin"){

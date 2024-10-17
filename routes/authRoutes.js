@@ -29,4 +29,5 @@ router.get('/advances',isAuthenticated,pageController.advances);
 
 router.get('/approvals',isAuthenticated,pageController.approvals);
 
+
 module.exports = router;

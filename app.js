@@ -4,6 +4,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
+const ajaxRoutes = require('./routes/ajaxRoutes');
 const error404 = require('./middlewares/404Middleware');
 const path = require('path');
 
@@ -15,7 +16,8 @@ mongoose.connect('mongodb://localhost:27017/express-tracker')
     .catch(err => console.log(err));
 
 // Middleware
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(cookieParser());
 
@@ -31,9 +33,10 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
 }));
 
+
 // Routes
 app.use('/', authRoutes);
-
+app.use('/ajax',ajaxRoutes);
 // 404 error middleware
 app.use(error404);
 

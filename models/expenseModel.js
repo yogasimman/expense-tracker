@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const expenseSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     tripId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip', required: true },
@@ -7,7 +9,11 @@ const expenseSchema = new mongoose.Schema({
     currency: { type: String, enum: ['INR', 'USD'], required: true },
     description: { type: String },
     date: { type: Date, default: Date.now },  // Auto-populates when the expense is created
-    createdAt: { type: Date, default: Date.now }
-});
+    receipts: [{ 
+        type: String, 
+        required: false // Array of image file paths or URLs 
+    }]
+},{ timestamps: true });
 
 const Expense = mongoose.model('Expense', expenseSchema);
+module.exports = Expense;

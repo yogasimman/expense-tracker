@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const reportSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     tripId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip', required: true },
@@ -11,7 +13,7 @@ const reportSchema = new mongoose.Schema({
     rejectionReason: { type: String },  // For rejected reports
     approvalMessage: { type: String },  // For accepted reports
     reimbursementDate: { type: Date },  // If applicable
-    createdAt: { type: Date, default: Date.now }
-});
+},{ timestamps: true });
 
 const Report = mongoose.model('Report', reportSchema);
+module.exports = Report;

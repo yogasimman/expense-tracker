@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const advanceSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     tripId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trip', required: true },
@@ -6,7 +8,7 @@ const advanceSchema = new mongoose.Schema({
     paidThrough: { type: String, required: true },  // e.g., bank, cash, card
     referenceId: { type: String },
     notes: { type: String },
-    createdAt: { type: Date, default: Date.now }
-});
+},{ timestamps: true });
 
 const Advance = mongoose.model('Advance', advanceSchema);
+module.exports = Advance;
