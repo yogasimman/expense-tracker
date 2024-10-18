@@ -8,12 +8,12 @@ const expenseSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     currency: { type: String, enum: ['INR', 'USD'], required: true },
     description: { type: String },
-    date: { type: Date, default: Date.now },  // Auto-populates when the expense is created
-    receipts: [{ 
-        type: String, 
-        required: false // Array of image file paths or URLs 
+    date: { type: Date, default: Date.now },
+    receipts: [{
+        type: mongoose.Schema.Types.ObjectId, // Reference to GridFS files
+        ref: 'fs.files'  // GridFS stores file metadata in the 'fs.files' collection
     }]
-},{ timestamps: true });
+}, { timestamps: true });
 
 const Expense = mongoose.model('Expense', expenseSchema);
 module.exports = Expense;

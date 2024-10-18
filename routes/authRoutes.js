@@ -32,4 +32,5 @@ router.get('/approvals',isAuthenticated,pageController.approvals);
 
 router.post('/addUser',isAuthenticated,pageController.addUser)
 
+router.get('/reports',isAuthenticated,pageController.addReports);
 module.exports = router;

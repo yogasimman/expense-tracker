@@ -19,23 +19,25 @@
             <div class="left-section">
                 <!-- Add Category Section (Admin only) -->
                 <% if (role === 'admin') { %>
-                <div class="category-section">
-                    <h2><i class="bi bi-tags"></i> Add or Remove Category</h2>
-                    <form id="category-form" action="#" method="POST" class="category-form">
-                        <div class="form-group">
-                            <label for="new-category">New Category:</label>
-                            <input type="text" id="new-category" name="new-category" required>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="addCategory()">Add Category</button>
-                        <div class="form-group mt-3">
-                            <label for="remove-category">Remove Category:</label>
-                            <select id="remove-category" name="remove-category">
-                                <option value="">Select a Category to Remove</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-danger" onclick="removeCategory()">Remove Category</button>
-                    </form>
-                </div>
+                    <div class="category-section">
+                        <h2><i class="bi bi-tags"></i> Add or Remove Category</h2>
+                        <form id="category-form" action="#" method="POST" class="category-form">
+                            <div class="form-group">
+                                <label for="new-category">New Category:</label>
+                                <input type="text" id="new-category" name="new-category" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="addCategory()">Add Category</button>
+                            <div class="form-group mt-3">
+                                <label for="remove-category">Remove Category:</label>
+                                <select id="remove-category" name="remove-category">
+                                    <option value="">Select a Category to Remove</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="removeCategory()">Remove Category</button>
+                        </form>
+                        <p id="category_respone"></p>
+                    </div>
+                    
                 <% } %>
 
                 <!-- Upload Receipts Section -->
@@ -88,16 +90,12 @@
                         <label for="category">Category:</label>
                         <select id="category" name="category" required>
                             <option value="">Select a Category</option>
-                            <option value="travel">Travel</option>
-                            <option value="food">Food</option>
-                            <option value="office-supplies">Office Supplies</option>
-                            <option value="others">Others</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="trips">Trips:</label>
-                        <select id="trips" name="trips">
+                        <select id="applyToTrip" name="trips">
                             <option selected>Select</option>
                             <% trips.forEach(function(trip) { %>
                                 <option value="<%= trip._id %>"><%= trip.tripName %></option>
@@ -108,6 +106,7 @@
                         <label for="description">Description:</label>
                         <textarea id="description" name="description" rows="4" required></textarea>
                     </div>
+                    <p id="expense_response"></p>
                     <button type="submit" class="submit-btn">Submit Expense</button>
                 </form>
             </div>
@@ -160,32 +159,35 @@
             return '📁'; // Default file icon
         }
 
+    </script>
+    <script>
         document.getElementById('selectUser').addEventListener('change', function() {
-        const userId = this.value; // Get the selected user ID
-        
-        if (userId) {
-            // Make an AJAX request to fetch the trips for the selected user
-            fetch(`/trips/${userId}`)
-                .then(response => response.json())
-                .then(trips => {
-                    // Get the 'applyToTrip' select element
-                    const tripSelect = document.getElementById('applyToTrip');
-
-                    // Clear existing options
-                    tripSelect.innerHTML = '<option selected>Select</option>';
-
-                    // Add new options for each trip
-                    trips.forEach(trip => {
-                        const option = document.createElement('option');
-                        option.value = trip._id; // Set trip ID as option value
-                        option.textContent = trip.tripName; // Set trip name as the option text
-                        tripSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching trips:', error));
-        }
-    });
+            const userId = this.value; // Get the selected user ID
+            
+            if (userId) {
+                // Make an AJAX request to fetch the trips for the selected user
+                fetch(`/trips/${userId}`)
+                    .then(response => response.json())
+                    .then(trips => {
+                        // Get the 'applyToTrip' select element
+                        const tripSelect = document.getElementById('applyToTrip');
+    
+                        // Clear existing options
+                        tripSelect.innerHTML = '<option selected>Select</option>';
+    
+                        // Add new options for each trip
+                        trips.forEach(trip => {
+                            const option = document.createElement('option');
+                            option.value = trip._id; // Set trip ID as option value
+                            option.textContent = trip.tripName; // Set trip name as the option text
+                            tripSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching trips:', error));
+            }
+        });
     </script>
     <script src="/script/expense.js"></script>
+    <script src="/script/category.js"></script>
 </body>
 </html>

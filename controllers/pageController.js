@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const Trip = require('../models/tripModel');
 const Expense = require('../models/expenseModel');
 const Category = require('../models/categoryModel');
-const Reports = require('../models/reportsModel');
+
 const Advances = require('../models/advancesModel');
 const bcrypt = require('bcrypt');
 
@@ -50,7 +50,7 @@ exports.expenses =async (req, res) => {
         }
 
         // Render the advances view with the trip and user data
-        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role });
+        res.render('expenses', { currentPath: req.url, trips: trips, users: users, role: role });
 
     } catch (error) {
         console.error('Error retrieving trips and users:', error);
@@ -85,7 +85,7 @@ exports.advances = async (req, res) => {
         }
 
         // Render the advances view with the trip and user data
-        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role });
+        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role ,user: req.session.user.id});
 
     } catch (error) {
         console.error('Error retrieving trips and users:', error);
@@ -138,5 +138,31 @@ exports.addUser = async (req, res) => {
         }
 
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.addReports = async (req, res) => {
+
+
+
+    try{
+        const userId = req.session.user.id;
+        const role = req.session.user.role;
+
+        const trips = await Trip.find({ userId: userId }, { tripName: 1 }); // Fetch only tripName and tripId
+        console.log('Fetched trips:', trips);
+
+        // Fetch all users if the logged-in user is an admin
+        let users = [];
+        if (role === 'admin') {
+            users = await User.find({}, { name: 1 });  // Fetch only the name field of all users
+            console.log('Fetched users:', users);
+        }
+        res.render('addReport', { users, trips, role: role, user: userId, currentPath: req.url });
+
+        
+    }catch(error){
+        console.error('Error retrieving trips and users:', error);
+        res.status(500).send('Server Error');
     }
 };

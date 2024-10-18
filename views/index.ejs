@@ -77,10 +77,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form id="reportForm">
                             <div class="mb-3">
                                 <label for="reportName" class="form-label">Report Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="reportName" placeholder="eg: Trip to New York">
+                                <input type="text" class="form-control" id="reportName" placeholder="eg: Trip to New York" required>
                             </div>
                             <div class="mb-3">
                                 <label for="businessPurpose" class="form-label">Business Purpose</label>
@@ -90,19 +90,17 @@
                                 <label class="form-label">Duration</label>
                                 <div class="row">
                                     <div class="col">
-                                        <input type="text" class="form-control" placeholder="eg: 31/01/2020">
+                                        <input type="date" class="form-control" id="startDate" required>
                                     </div>
                                     <div class="col">
-                                        <input type="text" class="form-control" placeholder="eg: 31/01/2020">
+                                        <input type="date" class="form-control" id="endDate" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="trip" class="form-label">Trip</label>
-                                <select class="form-select" id="trip">
-                                    <% if (trips.length === 0) { %>
-                                        <option selected>Select</option>
-                                    <% } %>
+                                <select class="form-select" id="trip" required>
+                                    <option selected>Select</option>
                                     <% trips.forEach(function(trip) { %>
                                         <option value="<%= trip._id %>"><%= trip.tripName %></option>
                                     <% }); %>
@@ -111,11 +109,12 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-primary" id="saveReportButton">Save</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
