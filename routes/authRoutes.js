@@ -30,7 +30,16 @@ router.get('/advances',isAuthenticated,pageController.advances);
 
 router.get('/approvals',isAuthenticated,pageController.approvals);
 
-router.post('/addUser',isAuthenticated,pageController.addUser)
+router.post('/addUser',isAuthenticated,pageController.addUser);
 
+router.get('/analytics', isAuthenticated, pageController.analytics);
+
+router.get('/sidebar', isAuthenticated, pageController.sidebar);
+
+router.get('/viewtrips', isAuthenticated, pageController.viewtrips);
+
+router.get('/viewreports', isAuthenticated, pageController.viewreports);
 router.get('/reports',isAuthenticated,pageController.addReports);
+
+
 module.exports = router;

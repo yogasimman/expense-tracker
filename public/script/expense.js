@@ -1,44 +1,58 @@
 document.querySelector('.expense-form').addEventListener('submit', async function(event) {
-  event.preventDefault();
-  const form = new FormData(this);
-  const files = document.getElementById('file-upload').files;
-  
-  // First, upload receipts to GridFS
-  const receiptUpload = await fetch('/upload-receipts', {
-      method: 'POST',
-      body: new FormData(document.getElementById('file-upload-form')) // Assuming you have a form element for file uploads
-  });
-  const { fileIds } = await receiptUpload.json();  // Get back the file IDs from GridFS
+    event.preventDefault();
 
-  // Then, collect the rest of the expense form data and include the file IDs
-  const data = {
-      userId: form.get('selectUser'),
-      tripId: form.get('trips'),
-      categoryId: form.get('category'),
-      expenseTitle: form.get('expense-title'),
-      amount: form.get('amount'),
-      currency: form.get('currency'),
-      description: form.get('description'),
-      date: form.get('date'),
-      receipts: fileIds  // Include the array of file IDs
-  };
+    const form = new FormData(this);
+    const files = document.getElementById('file-upload').files;
+    const receipts = [];
 
-  // Send the expense data to your server
-  fetch('/ajax/add-expense', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(result => {
-      if (result.message) {
-          showModal(result.message, 'success');
-      }
-  })
-  .catch(error => {
-      console.error('Error:', error);
-      showModal('Failed to add expense.', 'danger');
-  });
+    // Convert files to base64
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            receipts.push({
+                data: e.target.result.split(',')[1], // Base64 string
+                contentType: file.type
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Wait for all files to be read
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Collect form data
+    const data = {
+        userId: 'yourUserIdHere', // Replace this with the actual user ID
+        tripId: form.get('trips'),
+        categoryId: form.get('category'),
+        expenseTitle: form.get('expense-title'),
+        amount: form.get('amount'),
+        currency: form.get('currency'),
+        description: form.get('description'),
+        date: form.get('date'),
+        receipts
+    };
+
+    // Send the form data to the server using AJAX
+    fetch('/ajax/add-expense', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.message) {
+            showModal(result.message, 'success'); // Show success modal
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showModal('Failed to add expense.', 'danger'); // Show error modal
+    });
 });
 
 // Function to show modal

@@ -14,51 +14,52 @@ const app = express();
 const { GridFsStorage } = require('multer-gridfs-storage');
 const crypto = require('crypto');
 
-// MongoDB Atlas connection (replace <db_password> with your actual password)
-const mongoURI = 'mongodb://localhost:27017/express-tracker';
-mongoose.connect(mongoURI)
-.then(() => {
-    console.log('MongoDB connected');
-    initGridFS();  // Initialize GridFS after connection is established
-})
-    .catch(err => console.log(err));
 
-// Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.set('view engine', 'ejs');
-app.use(cookieParser());
+    // MongoDB Atlas connection
+    const mongoURI = 'mongodb://localhost:27017/express-tracker';
+    mongoose.connect(mongoURI)
+    .then(() => {
+        console.log('MongoDB connected');
+        initGridFS();  // Initialize GridFS after connection is established
+    })
+        .catch(err => console.log(err));
 
-// Serve static files first
-app.use(express.static(path.join(__dirname, 'public')));
+    // Middleware
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.set('view engine', 'ejs');
+    app.use(cookieParser());
 
-// Session middleware (use MongoStore for Atlas)
-app.use(session({
-    secret: 'your_secret_key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/express-tracker' }),
-    cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
-}));
+    // Serve static files first
+    app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
-app.use('/', authRoutes);
-app.use('/ajax', ajaxRoutes);
+    // Session middleware
+    app.use(session({
+        secret: 'your_secret_key',
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/express-tracker' }),
+        cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
+    }));
 
+    // Routes
+    app.use('/', authRoutes);
+    app.use('/ajax', ajaxRoutes);
+    app.use('/analytics', analyticsRoutes); // Use the analytics routes
 
-// Route to fetch trips for a selected user (only for admins)
-app.get('/trips/:userId', async (req, res) => {
-    try {   
-        const userId = req.params.userId; // Get user ID from the URL
-        const trips = await Trip.find({ userId: userId }, { tripName: 1 }); // Fetch trips for the selected user
-        res.json(trips); // Send trips as JSON response
-    } catch (error) {
-        console.error('Error fetching trips:', error);
-        res.status(500).send('Server Error');
-    }
-});
+    // Route to fetch trips for a selected user (only for admins)
+    app.get('/trips/:userId', async (req, res) => {
+        try {   
+            const userId = req.params.userId; // Get user ID from the URL
+            const trips = await Trip.find({ userId: userId }, { tripName: 1 }); // Fetch trips for the selected user
+            res.json(trips); // Send trips as JSON response
+        } catch (error) {
+            console.error('Error fetching trips:', error);
+            res.status(500).send('Server Error');
+        }
+    });
 
-let gfs;
+    let gfs;
 let conn = mongoose.connection;
 
 function initGridFS() {
@@ -119,11 +120,42 @@ app.get('/file/:fileId', (req, res) => {
     });
 });
 
-// 404 error middleware
-app.use(error404);
 
-// Server start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+    // Route to handle status update requests
+    app.post('/update-status', async (req, res) => {
+        try {
+            const { id, status } = req.body;
+    
+            // Validate input
+            if (!id || !status) {
+                return res.status(400).json({ success: false, message: 'Invalid input' });
+            }
+    
+            console.log("Updating status for ID:", id, "Status:", status); // Log incoming values
+    
+            // Update the trip status
+            const updatedTrip = await Trip.findByIdAndUpdate(
+                id,
+                { status: status },
+                { new: true, runValidators: true }
+            );
+    
+            if (!updatedTrip) {
+                return res.status(404).json({ success: false, message: 'Trip not found' });
+            }
+    
+            res.json({ success: true, message: 'Status updated successfully', updatedTrip });
+        } catch (error) {
+            console.error('Error updating status:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    });
+    
+    // 404 error middleware
+    app.use(error404);
+
+    // Server start
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });

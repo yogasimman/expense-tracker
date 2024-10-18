@@ -4,21 +4,25 @@
     <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">
         <i class="bi bi-house-fill"></i>&nbsp;&nbsp;Home
     </a>
-    <a href="/trips" class="<%= currentPath === '/trips' ? 'active' : '' %>">
+    <a href="/viewtrips" class="<%= currentPath === '/trips' ? 'active' : '' %>">
         <i class="bi bi-airplane-fill"></i>&nbsp;&nbsp;Trip
     </a>
     <a href="/expenses" class="<%= currentPath === '/expenses' ? 'active' : '' %>">
         <i class="bi bi-cash-stack"></i>&nbsp;&nbsp;Expenses
     </a>
-    <a href="/reports" class="<%= currentPath === '/reports' ? 'active' : '' %>">
+    <a href="/viewreports" class="<%= currentPath === '/reports' ? 'active' : '' %>">
         <i class="bi bi-card-checklist"></i>&nbsp;&nbsp;Reports
     </a>
     <a href="/advances" class="<%= currentPath === '/advances' ? 'active' : '' %>">
         <i class="bi bi-credit-card"></i>&nbsp;&nbsp;Advances
     </a>
+
+    <% if (role === 'admin') { %> <!-- Check if the user role is admin -->
     <a href="/approvals" class="<%= currentPath === '/approvals' ? 'active' : '' %>">
         <i class="bi bi-check2-circle"></i>&nbsp;&nbsp;Approvals
     </a>
+    <% } %>
+
     <a href="/analytics" class="<%= currentPath === '/analytics' ? 'active' : '' %>">
         <i class="bi bi-bar-chart-fill"></i>&nbsp;&nbsp;Analytics
     </a>

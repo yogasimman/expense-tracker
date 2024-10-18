@@ -89,9 +89,19 @@ table td {
     color: white;
 }
 
+.status-submitted {
+    background-color: #ffc107;
+    color: white;
+}
 .status-declined {
     background-color: #dc3545;
     color: white;
+}
+
+.status-rejected {
+    background-color: red; /* Color for rejected status */
+    color: white;
+
 }
 
 .empty-message {

@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         console.log(tripData); // Log the trip data for debugging
-        const p = document.getElementById('result');
+
         // Send the data using AJAX
         fetch('/ajax/add-trip', {
             method: 'POST',
@@ -114,16 +114,13 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(data => {
             if (data.message === 'Trip added successfully') {
-                p.innerHTML =  `<span style="color:green"> ${data.message} </span>`;
                 console.log('Success:', data);
                 // Optionally redirect or show success message
             } else {
-                p.innerHTML = `<span style="color:red"> ${data.message} </span>`;
                 throw new Error('Error: ' + (data.message || 'Unknown error'));
             }
         })
         .catch((error) => {
-            p.innerHTML = `<span style="color:red">Error: ${error} </span>`;
             console.error('Error:', error);
         });
     });
