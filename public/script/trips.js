@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('saveButton').addEventListener('click', function (event) {
-        event.preventDefault(); // Prevent form submission
+   
 
         // Collect trip details
         const tripName = document.getElementById('tripName').value;

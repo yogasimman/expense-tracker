@@ -30,12 +30,35 @@
             </div>
 
             <!-- Trip Name -->
-        <form id="tripForm">
+        
             <div class="mb-3">
                 <label for="tripName" class="form-label">Trip Name *</label>
                 <input type="text" class="form-control" id="tripName" name="tripName" placeholder="eg: Trip to New York" required>
             </div>
-
+            
+            <% if (locals.role === 'admin') { %>
+                <div class="mb-3">
+                    <label for="selectUsers" class="form-label">Select Users</label>
+                    <div class="user-selector">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Users
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="userDropdown">
+                                <li><a class="dropdown-item" href="#" data-value="user1">User 1</a></li>
+                                <li><a class="dropdown-item" href="#" data-value="user2">User 2</a></li>
+                                <li><a class="dropdown-item" href="#" data-value="user3">User 3</a></li>
+                                <li><a class="dropdown-item" href="#" data-value="user4">User 4</a></li>
+                                <li><a class="dropdown-item" href="#" data-value="user5">User 5</a></li>
+                                <!-- Add more users as needed -->
+                            </ul>
+                        </div>
+                        <div id="selectedUsers" class="selected-users mt-2"></div>
+                    </div>
+                    <div class="form-text">Click on a user to select or deselect them.</div>
+                </div>
+            <% } %>
+            
           <!-- Travel Type -->
     <div class="mb-3">
         <label class="form-label">Travel Type *</label>
@@ -214,16 +237,60 @@
             <div class="d-flex justify-content-end mt-4">
                 <button type="button" id="saveButton" class="btn btn-primary">Save and Submit</button>
             </div>
-        </form>
         </div>
     </div>
 
 
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
+        const userDropdown = document.getElementById('userDropdown');
+    const selectedUsersDiv = document.getElementById('selectedUsers');
+    const selectedValues = new Set();
+
+    userDropdown.addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            e.preventDefault(); // Prevent default link behavior
+            const value = e.target.getAttribute('data-value');
+            
+            // Toggle selection
+            if (selectedValues.has(value)) {
+                selectedValues.delete(value);
+                removeUserChip(value);
+            } else {
+                selectedValues.add(value);
+                addUserChip(value);
+            }
+        }
+    });
+
+    function addUserChip(value) {
+        const userChip = document.createElement('div');
+        userChip.className = 'user-chip';
+        userChip.innerText = value;
+
+        const removeButton = document.createElement('span');
+        removeButton.className = 'remove-user';
+        removeButton.innerText = ' ✖'; // X button
+        removeButton.onclick = () => {
+            selectedValues.delete(value);
+            userChip.remove(); // Remove the chip from display
+        };
+
+        userChip.appendChild(removeButton);
+        selectedUsersDiv.appendChild(userChip);
+    }
+
+    function removeUserChip(value) {
+        const chips = Array.from(selectedUsersDiv.children);
+        const chipToRemove = chips.find(chip => chip.innerText.startsWith(value));
+        if (chipToRemove) {
+            chipToRemove.remove(); // Remove the chip from display
+        }
+    }
         function toggleSection(sectionId, button) {
-            event.preventDefault();
+           
             const section = document.getElementById(sectionId);
             const isSectionVisible = section.style.display === 'block';
 
@@ -232,7 +299,7 @@
         }
 
         function handleTravelTypeChange() {
-            event.preventDefault(); 
+           
     const isLocal = document.getElementById('local').checked;
     const transportOptions = ['flightOption', 'busOption', 'trainOption', 'cabOption'];
 
@@ -254,7 +321,7 @@
 
         // Function to add transport entry dynamically and show delete button only for additional entries
         function addTransportEntry(containerId) {
-            event.preventDefault(); 
+            
             const container = document.getElementById(containerId);
             const newEntry = container.firstElementChild.cloneNode(true);
 
@@ -271,7 +338,7 @@
 
         // Function to delete transport entry
         function deleteTransportEntry(button) {
-            event.preventDefault(); 
+           
             const entry = button.closest('.transport-entry');
             entry.remove();
         }

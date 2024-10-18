@@ -1,140 +1,131 @@
+/* Main container */
+.main-content {
+    margin-left: 240px; /* Space for the sidebar */
+}
 
-        .main-content {
-            margin-left: 240px; /* Space for the sidebar */
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+.container {
+    display: flex;
+    justify-content: space-between; /* Ensure left and right sections are side by side */
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+}
 
+.left-section {
+    width: 48%; /* Adjusted to take about half the space */
+    display: flex;
+    flex-direction: column; /* Stack Add Category and Upload Receipts vertically */
+    gap: 20px; /* Add spacing between sections */
+}
 
-        .container {
-            display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-        }
+/* Right section for the form */
+.right-section {
+    width: 48%; /* Adjusted to take about half the space */
+}
 
-        .left-section, .right-section {
-            width: 48%;
-        }
+/* General form and input styling */
+.form-group {
+    margin-bottom: 20px;
+}
 
-        .main-content h2 {
-            margin-bottom: 20px;
-            font-size: 26px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #2c3e50;
+}
 
-        /* Upload Section Styling */
-        .upload-area {
-            padding: 30px;
-            border: 2px dashed #ccc;
-            border-radius: 12px;
-            text-align: center;
-            background-color: #f9f9f9;
-            transition: background 0.3s ease;
-        }
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s ease;
+}
 
-        .upload-area:hover {
-            background-color: #ecf0f1;
-        }
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+    border-color: #1abc9c;
+    outline: none;
+}
 
-        .upload-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 15px 25px;
-            background-color: #1abc9c;
-            color: white;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+/* Submit button styling */
+.submit-btn {
+    padding: 15px 25px;
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-weight: 500;
+}
 
-        .upload-btn:hover {
-            background-color: #16a085;
-        }
+.submit-btn:hover {
+    background-color: #16a085;
+}
 
-        #file-upload {
-            display: none;
-        }
+/* Upload Section Styling */
+.upload-area {
+    padding: 30px;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    text-align: center;
+    background-color: #f9f9f9;
+    transition: background 0.3s ease;
+}
 
-        /* Display Files */
-        .file-preview {
-            display: flex;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
+.upload-area:hover {
+    background-color: #ecf0f1;
+}
 
-        .file-preview div {
-            margin-right: 10px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
+.upload-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 15px 25px;
+    background-color: #1abc9c;
+    color: white;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
 
-        .file-preview img {
-            max-width: 150px; /* Adjust size as necessary */
-            max-height: 150px; /* Adjust size as necessary */
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.upload-btn:hover {
+    background-color: #16a085;
+}
 
-        /* Expense Form Styling */
-        .expense-form {
-            display: flex;
-            flex-direction: column;
-        }
+#file-upload {
+    display: none;
+}
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+/* File preview styling */
+.file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
 
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 16px;
-            color: #2c3e50;
-        }
+.file-preview div {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
 
-        input[type="text"], input[type="number"], input[type="date"], select, textarea {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: #f8f9fa;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
-            border-color: #1abc9c;
-            outline: none;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-
-        /* Submit Button Styling */
-        .submit-btn {
-            padding: 15px 25px;
-            background-color: #1abc9c;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            font-weight: 500;
-        }
-
-        .submit-btn:hover {
-            background-color: #16a085;
-        }
+.file-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

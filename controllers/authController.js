@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
+const Trip = require('../models/tripModel');
+
 const { validationResult } = require('express-validator');
 
 exports.loginPage = (req, res) => {
@@ -70,13 +72,33 @@ exports.dashboardPage = (req, res) => {
 };
 
 
-exports.index = (req,res) => { 
-    if(req.session.isAuthenticated){
+exports.index = async (req, res) => { 
+    if (req.session.isAuthenticated) {
         const name = req.cookies.name;
         const role = req.cookies.role;
-        res.render('index',{name: name, currentPath : req.url, role: role});
-    }else{
+
+        // If the user is an admin, render the index page without trips
+       
+
+        try {
+            // Retrieve trip data for the current logged-in user
+            const userId = req.session.user.id; // Assuming the user ID is stored in the session
+            console.log("USER ID", userId);
+
+            // Fetch tripId and tripName from the trips collection for the current user
+            const trips = await Trip.find({ userId: userId }, { tripName: 1 }); // Fetch only tripName and tripId
+
+            // Log the trips to see what's being fetched
+            console.log('Fetched trips:', trips);
+
+            // Render the index view with the trip data
+            res.render('index', { name: name, currentPath: req.url, role: role, trips: trips });
+        } catch (error) {
+            console.error('Error retrieving trips:', error);
+            res.status(500).send('Server Error');
+        }
+    } else {
         return res.redirect('/login');
     }
-}
+};
 

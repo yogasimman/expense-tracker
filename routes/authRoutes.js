@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const authController = require('../controllers/authController');
 const pageController = require('../controllers/pageController');
 const isAuthenticated = require('../middlewares/authMiddleware');
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -29,5 +30,6 @@ router.get('/advances',isAuthenticated,pageController.advances);
 
 router.get('/approvals',isAuthenticated,pageController.approvals);
 
+router.post('/addUser',isAuthenticated,pageController.addUser)
 
 module.exports = router;
