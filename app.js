@@ -18,7 +18,11 @@ const crypto = require('crypto');
 
     // MongoDB Atlas connection
     const mongoURI = 'mongodb://localhost:27017/express-tracker';
-    mongoose.connect(mongoURI)
+    mongoose.connect(mongoURI,{
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    
+    })
     .then(() => {
         console.log('MongoDB connected');
         initGridFS();  // Initialize GridFS after connection is established
