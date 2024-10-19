@@ -28,16 +28,15 @@
             <div class="card">
                 <h3><i class="bi bi-clock-history"></i>
                     Pending Tasks</h3>
-                <p> Pending Approval : 0</p>
-                <p> Unreported Expenses : 0</p>
-                <p> Unreported Advances : 0</p>
+                <p> Pending Approval : 15</p>
+                <p> Unreported Expenses : 10</p>
+                <p> Unreported Advances : 3</p>
             </div>
             <div class="card">
                 <h3>Quick Add</h3>
                 <div class="quick-add-container">
                     <div class="quick-add-btn" id="create-expense"><i class="bi bi-receipt-cutoff"></i>&nbsp;Create Expense</div>
-                    <div class="quick-add-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
-                        <i class="bi bi-card-heading"></i>&nbsp;Create Report
+                    <div class="quick-add-btn" id="create-report"><i class="bi bi-card-heading"></i>&nbsp;Create report
                     </div>
                 </div>
             </div>
@@ -50,19 +49,19 @@
             <div class="report-stats">
                 <div class="stat-box">
                     <h4>Most Recent Reports</h4>
-                    <p>0 Reports</p>
+                    <p>3 Reports</p>
                 </div>
                 <div class="stat-box">
                     <h4>Unsubmitted Reports</h4>
-                    <p>0 Reports</p>
+                    <p>1 Reports</p>
                 </div>
                 <div class="stat-box">
                     <h4>Awaiting Approval</h4>
-                    <p>0 Reports</p>
+                    <p>3 Reports</p>
                 </div>
                 <div class="stat-box">
                     <h4>Awaiting Reimbursement</h4>
-                    <p>0 Reports</p>
+                    <p>2 Reports</p>
                 </div>
             </div>
         </div>
@@ -122,7 +121,12 @@
         
         document.getElementById('create-expense').addEventListener('click', function() {
             
-            window.location.href = 'exp.html';
+            window.location.href = '/expenses';
+        });
+
+        document.getElementById('create-report').addEventListener('click', function() {
+            
+            window.location.href = '/reports';
         });
 
        

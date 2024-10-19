@@ -74,7 +74,7 @@
                     <div class="mb-3">
                         <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <select class="form-select" style="max-width: 100px;">
+                            <select class="form-select"id="currency" style="max-width: 100px;">
                                 <option selected>INR</option>
                                 <option value="USD">USD</option>
                             </select>
@@ -159,6 +159,48 @@
             return '📁'; // Default file icon
         }
 
+        document.querySelector('.expense-form').addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevent default form submission
+
+  // Gather form data
+  console.log(document.cookie);
+  const expenseTitle = document.getElementById('expense-title').value;
+  const amount = document.getElementById('amount').value;
+  const currency = document.getElementById('currency').value
+  const date = document.getElementById('date').value;
+  const categoryId = document.getElementById('category').value;
+  const tripId = document.getElementById('applyToTrip').value;
+  const description = document.getElementById('description').value;
+  const receipts = []; // Add logic for capturing receipts here if necessary
+
+  // Make the AJAX POST request to add the expense
+  fetch('/ajax/add-expense', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+          expenseTitle,
+          currency,
+          amount,
+          date,
+          categoryId:categoryId,
+          tripId,
+          description,
+          receipts,
+          userId: '<%= user%>' // Pass the user ID from the session
+      })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.message) {
+          document.getElementById('expense_response').innerText = data.message;
+      } else {
+          document.getElementById('expense_response').innerText = 'Error adding expense.';
+      }
+  })
+  .catch(error => console.error('Error:', error));
+});
     </script>
     <script>
         document.getElementById('selectUser').addEventListener('change', function() {
@@ -187,7 +229,6 @@
             }
         });
     </script>
-    <script src="/script/expense.js"></script>
     <script src="/script/category.js"></script>
 </body>
 </html>

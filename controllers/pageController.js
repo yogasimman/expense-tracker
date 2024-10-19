@@ -50,7 +50,7 @@ exports.expenses =async (req, res) => {
         }
 
         // Render the advances view with the trip and user data
-        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role });
+        res.render('expenses', { currentPath: req.url, trips: trips, users: users, role: role, user:userId });
 
     } catch (error) {
         console.error('Error retrieving trips and users:', error);
@@ -85,7 +85,7 @@ exports.advances = async (req, res) => {
         }
 
         // Render the advances view with the trip and user data
-        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role });
+        res.render('advances', { currentPath: req.url, trips: trips, users: users, role: role, user: userId });
 
     } catch (error) {
         console.error('Error retrieving trips and users:', error);

@@ -29,7 +29,7 @@ const tripSchema = new mongoose.Schema({
             description: { type: String }
         }]
     },
-    status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     userId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }] // Reference to the User model
     
 },{ timestamps: true });

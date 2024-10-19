@@ -5,6 +5,7 @@ const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const ajaxRoutes = require('./routes/ajaxRoutes');
+const analyticsRoutes = require('./routes/analytics')
 const error404 = require('./middlewares/404Middleware');
 const path = require('path');
 const Trip = require('./models/tripModel');
