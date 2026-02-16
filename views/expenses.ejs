@@ -203,31 +203,35 @@
 });
     </script>
     <script>
-        document.getElementById('selectUser').addEventListener('change', function() {
-            const userId = this.value; // Get the selected user ID
-            
-            if (userId) {
-                // Make an AJAX request to fetch the trips for the selected user
-                fetch(`/trips/${userId}`)
-                    .then(response => response.json())
-                    .then(trips => {
-                        // Get the 'applyToTrip' select element
-                        const tripSelect = document.getElementById('applyToTrip');
-    
-                        // Clear existing options
-                        tripSelect.innerHTML = '<option selected>Select</option>';
-    
-                        // Add new options for each trip
-                        trips.forEach(trip => {
-                            const option = document.createElement('option');
-                            option.value = trip._id; // Set trip ID as option value
-                            option.textContent = trip.tripName; // Set trip name as the option text
-                            tripSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error fetching trips:', error));
-            }
-        });
+        const selectUserElement = document.getElementById('selectUser');
+        
+        if (selectUserElement) {
+            selectUserElement.addEventListener('change', function() {
+                const userId = this.value; // Get the selected user ID
+                
+                if (userId) {
+                    // Make an AJAX request to fetch the trips for the selected user
+                    fetch(`/trips/${userId}`)
+                        .then(response => response.json())
+                        .then(trips => {
+                            // Get the 'applyToTrip' select element
+                            const tripSelect = document.getElementById('applyToTrip');
+        
+                            // Clear existing options
+                            tripSelect.innerHTML = '<option selected>Select</option>';
+        
+                            // Add new options for each trip
+                            trips.forEach(trip => {
+                                const option = document.createElement('option');
+                                option.value = trip._id; // Set trip ID as option value
+                                option.textContent = trip.tripName; // Set trip name as the option text
+                                tripSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching trips:', error));
+                }
+            });
+        }
     </script>
     <script src="/script/category.js"></script>
 </body>

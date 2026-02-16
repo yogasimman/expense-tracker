@@ -249,23 +249,28 @@
     const selectedUsersDiv = document.getElementById('selectedUsers');
     const selectedValues = new Set();
 
-    userDropdown.addEventListener('click', function(e) {
-        if (e.target.classList.contains('dropdown-item')) {
-            e.preventDefault(); // Prevent default link behavior
-            const value = e.target.getAttribute('data-value');
-            
-            // Toggle selection
-            if (selectedValues.has(value)) {
-                selectedValues.delete(value);
-                removeUserChip(value);
-            } else {
-                selectedValues.add(value);
-                addUserChip(value);
+    // Only add event listener if userDropdown exists (admin only)
+    if (userDropdown) {
+        userDropdown.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dropdown-item')) {
+                e.preventDefault(); // Prevent default link behavior
+                const value = e.target.getAttribute('data-value');
+                
+                // Toggle selection
+                if (selectedValues.has(value)) {
+                    selectedValues.delete(value);
+                    removeUserChip(value);
+                } else {
+                    selectedValues.add(value);
+                    addUserChip(value);
+                }
             }
-        }
-    });
+        });
+    }
 
     function addUserChip(value) {
+        if (!selectedUsersDiv) return;
+        
         const userChip = document.createElement('div');
         userChip.className = 'user-chip';
         userChip.innerText = value;
@@ -283,6 +288,8 @@
     }
 
     function removeUserChip(value) {
+        if (!selectedUsersDiv) return;
+        
         const chips = Array.from(selectedUsersDiv.children);
         const chipToRemove = chips.find(chip => chip.innerText.startsWith(value));
         if (chipToRemove) {

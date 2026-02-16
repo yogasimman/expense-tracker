@@ -7,7 +7,7 @@ function fetchCategories() {
             expenseCategorySelect.innerHTML = '<option value="">Select a Category</option>';
             data.forEach(category => {
                 const option = document.createElement('option');
-                option.value = category._id; // Using _id as the identifier
+                option.value = category.id; // Using id as the identifier (PostgreSQL)
                 option.textContent = category.name;
                 expenseCategorySelect.appendChild(option);
             });
@@ -18,7 +18,7 @@ function fetchCategories() {
                 removeCategorySelect.innerHTML = '<option value="">Select a Category to Remove</option>';
                 data.forEach(category => {
                     const option = document.createElement('option');
-                    option.value = category._id; // Using _id as the identifier
+                    option.value = category.id; // Using id as the identifier (PostgreSQL)
                     option.textContent = category.name;
                     removeCategorySelect.appendChild(option);
                 });

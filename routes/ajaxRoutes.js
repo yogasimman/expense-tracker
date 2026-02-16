@@ -16,4 +16,12 @@ router.delete('/category',isAuthenticated,ajaxController.delete_category);
 router.post('/advances',isAuthenticated,ajaxController.addAdvances);
 router.post('/add-report',isAuthenticated,ajaxController.addReport);
 
+// Approval workflow routes
+router.get('/trip-details/:tripId', isAuthenticated, ajaxController.getTripDetails);
+router.post('/approve-expenses', isAuthenticated, ajaxController.approveExpenses);
+router.post('/reject-expense', isAuthenticated, ajaxController.rejectExpense);
+router.post('/approve-advances', isAuthenticated, ajaxController.approveAdvances);
+router.post('/reject-advance', isAuthenticated, ajaxController.rejectAdvance);
+router.post('/finish-trip', isAuthenticated, ajaxController.finishTrip);
+
 module.exports = router;

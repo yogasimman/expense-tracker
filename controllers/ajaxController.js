@@ -7,7 +7,7 @@ const Advance = require('../models/advancesModel');
 
 exports.add_trip = async (req, res) => {
     try {
-        console.log(req.body);  // Log the request body
+        console.log(req.body);
         const { tripName, travelType, itinerary } = req.body;
 
         // Check if userId is present in the request body; if not, use session user ID
@@ -15,22 +15,19 @@ exports.add_trip = async (req, res) => {
 
         // Ensure userId is stored as an array, even if it's a single value
         if (!Array.isArray(userId)) {
-            userId = [userId];  // Convert userId to an array
+            userId = [userId];
         }
 
-        console.log('User ID:', userId); // Log userId before saving
+        console.log('User ID:', userId);
 
-        // Create a new Trip object using the Mongoose model
-        const newTrip = new Trip({
+        // Create trip using PostgreSQL model
+        const savedTrip = await Trip.create({
             tripName,
             travelType,
             itinerary,
-            userId: userId, // Assign the user ID array
-            status: 'pending' // Default status when creating a trip
+            userId: userId,
+            status: 'pending'
         });
-
-        // Save the trip to the database
-        const savedTrip = await newTrip.save();
 
         // Return success response
         res.status(200).json({
@@ -38,7 +35,7 @@ exports.add_trip = async (req, res) => {
             trip: savedTrip
         });
     } catch (error) {
-        console.error('Error adding trip:', error); // Log the error
+        console.error('Error adding trip:', error);
         res.status(500).json({
             message: 'Error adding trip',
             error: error.message
@@ -50,64 +47,97 @@ exports.add_trip = async (req, res) => {
 
 exports.add_expense = async (req, res) => {
     try {
-        const { userId, tripId, categoryId, expenseTitle, amount, currency, description, date } = req.body;
+        const { tripId, categoryId, expenseTitle, amount, currency, description, date } = req.body;
         
+        // Use session user ID as fallback
+        const userId = req.body.userId || req.session.user.id;
+        
+        // Validate required fields
+        if (!userId || !tripId || tripId === 'Select') {
+            return res.status(400).json({ message: 'User and Trip are required.' });
+        }
+        if (!categoryId || categoryId === '' || categoryId === 'Select') {
+            return res.status(400).json({ message: 'Category is required.' });
+        }
+        if (!expenseTitle || !amount) {
+            return res.status(400).json({ message: 'Expense title and amount are required.' });
+        }
+        if (!currency || currency === 'Select') {
+            return res.status(400).json({ message: 'Currency is required.' });
+        }
+
+        // Check trip status - must be approved and not finished
+        const trip = await Trip.findById(parseInt(tripId));
+        if (!trip) {
+            return res.status(404).json({ message: 'Trip not found.' });
+        }
+        if (trip.status !== 'approved') {
+            return res.status(400).json({ 
+                message: `Cannot add expenses to ${trip.status} trip. Trip must be approved first.`,
+                tripStatus: trip.status 
+            });
+        }
+        if (trip.status === 'finished') {
+            return res.status(400).json({ 
+                message: 'Cannot add expenses to a finished trip.',
+                tripStatus: trip.status 
+            });
+        }
+
         // Check if files exist
         const receipts = req.body.receipts ? req.body.receipts : [];
 
-        // Create a new expense
-        const newExpense = new Expense({
-            userId,
-            tripId,
-            categoryId,
+        // Create a new expense using PostgreSQL model
+        const newExpense = await Expense.create({
+            userId: parseInt(userId),
+            tripId: parseInt(tripId),
+            categoryId: parseInt(categoryId),
             expenseTitle,
-            amount,
+            amount: parseFloat(amount),
             currency,
             description,
-            date,
+            date: date || new Date(),
             receipts
         });
-
-        // Save the expense
-        await newExpense.save();
 
         res.status(200).json({ message: 'Expense added successfully!' });
     } catch (error) {
         console.error('Error adding expense:', error);
-        res.status(500).json({ message: 'Failed to add expense.' });
+        res.status(500).json({ message: 'Failed to add expense: ' + error.message });
     }
 };
 
 exports.advances = async (req, res) => {
     try {
-        const userId = req.session.user.id; // Get the user ID from the session
-        console.log('User ID:', userId); // Log the user ID
+        const userId = req.session.user.id;
+        console.log('User ID:', userId);
         
-        // Check all trips for debugging
-        const allTrips = await Trip.find({ userId: userId });
-        console.log('All trips for user:', allTrips); // Log all trips for the user
+        // Fetch trips for the current user
+        const trips = await Trip.findByUserId(userId);
+        console.log('All trips for user:', trips);
 
-        // Fetch only the tripName for the specified userId
-        const trips = await Trip.find(
-            { userId: { $in: [userId] } }, 
-            { tripName: 1, _id: 1 } // Include _id for debugging
-        );
+        // Format for view (map to expected format)
+        const tripList = trips.map(t => ({
+            _id: t.id,
+            id: t.id,
+            tripName: t.tripName || t.trip_name
+        }));
 
-        console.log('Fetched trips:', JSON.stringify(trips, null, 2)); // Log the fetched trips
+        console.log('Fetched trips:', JSON.stringify(tripList, null, 2));
 
         // Render the EJS view and pass trips
-        res.render('advances', { currentPath: req.url, trips: trips });
+        res.render('advances', { currentPath: req.url, trips: tripList });
 
     } catch (error) {
-        console.error('Error fetching trips:', error); // Log any errors
+        console.error('Error fetching trips:', error);
         res.status(500).send('Server Error');
     }
 };
 
 exports.get_category = async (req, res) => {
     try {
-        const categories = await Category.find();
-        res.json(categories); // Send the categories as JSON
+        const categories = await Category.findAll();
+        res.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ message: 'Error fetching categories', error });
@@ -117,9 +147,8 @@ exports.get_category = async (req, res) => {
 exports.post_category = async (req, res) => {
     const { name } = req.body;
     try {
-        const newCategory = new Category({ name });
-        await newCategory.save();
-        res.status(201).json(newCategory); // Return the created category
+        const newCategory = await Category.create({ name });
+        res.status(201).json(newCategory);
     } catch (error) {
         console.error('Error adding category:', error);
         res.status(400).json({ message: 'Error adding category', error });
@@ -127,9 +156,9 @@ exports.post_category = async (req, res) => {
 }
 
 exports.delete_category = async (req, res) => {
-    const { id } = req.body; // Make sure to send the category ID in the body
+    const { id } = req.body;
     try {
-        const deletedCategory = await Category.findByIdAndDelete(id);
+        const deletedCategory = await Category.delete(id);
         if (!deletedCategory) {
             return res.status(404).json({ message: 'Category not found' });
         }
@@ -142,63 +171,78 @@ exports.delete_category = async (req, res) => {
 
 exports.addExpense = async (req, res) => {
     try {
-        const {
-            userId,
-            tripId,
-            categoryId,
-            expenseTitle,
-            amount,
-            currency,
-            description,
-            date,
-            receipts // Expecting an array of base64 strings or images
-        } = req.body;
+        const { expenseTitle, amount, currency, description, date, receipts } = req.body;
+        const userId = req.body.userId || req.session.user.id;
+        const tripId = req.body.tripId;
+        const categoryId = req.body.categoryId;
 
-        const newExpense = new Expense({
-            userId,
-            tripId,
-            categoryId,
+        if (!userId || !tripId || !categoryId || !expenseTitle || !amount || !currency) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const newExpense = await Expense.create({
+            userId: parseInt(userId),
+            tripId: parseInt(tripId),
+            categoryId: parseInt(categoryId),
             expenseTitle,
-            amount,
+            amount: parseFloat(amount),
             currency,
             description,
-            date,
-            receipts
+            date: date || new Date(),
+            receipts: receipts || []
         });
 
-        await newExpense.save();
         res.status(201).json({ message: 'Expense added successfully', expense: newExpense });
     } catch (error) {
         console.error('Error adding expense:', error);
-        res.status(500).json({ message: 'Error adding expense', error });
+        res.status(500).json({ message: 'Error adding expense: ' + error.message });
     }
 };
 
 exports.addAdvances = async (req, res) => {
     try {
-        // Get form data from the request body
-        const { userId, tripId, amount, currency, paidThrough, reference, notes } = req.body;
+        const { amount, currency, paidThrough, reference, notes } = req.body;
+        const userId = req.body.userId || req.session.user.id;
+        const tripId = req.body.tripId;
 
-        // Validate required fields (you can extend this with more validation as needed)
         if (!userId || !tripId || !amount || !currency || !paidThrough) {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
-        // Create a new advance record
-        const newAdvance = new Advance({
-            userId,
-            tripId,
-            amount,
+        if (tripId === 'Select' || !tripId) {
+            return res.status(400).json({ success: false, message: 'Please select a valid trip' });
+        }
+
+        // Check trip status - must be approved and not finished
+        const trip = await Trip.findById(parseInt(tripId));
+        if (!trip) {
+            return res.status(404).json({ success: false, message: 'Trip not found' });
+        }
+        if (trip.status !== 'approved') {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Cannot add advances to ${trip.status} trip. Trip must be approved first.`,
+                tripStatus: trip.status 
+            });
+        }
+        if (trip.status === 'finished') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Cannot add advances to a finished trip.',
+                tripStatus: trip.status 
+            });
+        }
+
+        const newAdvance = await Advance.create({
+            userId: parseInt(userId),
+            tripId: parseInt(tripId),
+            amount: parseFloat(amount),
             currency,
             paidThrough,
             referenceId: reference,
             notes
         });
 
-        // Save the advance to the database
-        await newAdvance.save();
-
-        // Send a success response to the client
         res.status(200).json({ success: true, message: 'Advance recorded successfully', advance: newAdvance });
     } catch (error) {
         console.error('Error recording advance:', error);
@@ -209,20 +253,156 @@ exports.addAdvances = async (req, res) => {
 exports.addReport = async (req, res) => {
     try {
         const { reportName, businessPurpose, tripId, duration } = req.body;
-        // Add your logic to create a report
+        const userId = req.session.user.id;
         
-        const newReport = new Reports({
-            userId: req.session.user.id,
-            tripId,
+        if (!reportName || !businessPurpose || !tripId || !duration) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        if (!duration.startDate || !duration.endDate) {
+            return res.status(400).json({ success: false, message: 'Start date and end date are required' });
+        }
+
+        const newReport = await Reports.create({
+            userId: parseInt(userId),
+            tripId: parseInt(tripId),
             reportName,
             businessPurpose,
             duration,
         });
 
-        await newReport.save();
-        res.json({ success: true, message: 'Report added successfully' }); // Return a JSON response
+        res.json({ success: true, message: 'Report added successfully' });
     } catch (error) {
         console.error('Error adding report:', error);
-        res.status(500).json({ success: false, message: 'Failed to add report' }); // Ensure JSON response on error
+        res.status(500).json({ success: false, message: 'Failed to add report: ' + error.message });
+    }
+}
+
+exports.getTripDetails = async (req, res) => {
+    try {
+        const tripId = parseInt(req.params.tripId);
+        
+        // Get trip details
+        const trip = await Trip.findById(tripId);
+        if (!trip) {
+            return res.status(404).json({ message: 'Trip not found' });
+        }
+
+        // Get expenses for this trip
+        const expenses = await Expense.findByTripId(tripId);
+        
+        // Get advances for this trip
+        const advances = await Advance.findByTripId(tripId);
+
+        res.json({
+            trip,
+            expenses,
+            advances
+        });
+    } catch (error) {
+        console.error('Error fetching trip details:', error);
+        res.status(500).json({ message: 'Error fetching trip details: ' + error.message });
+    }
+};
+
+exports.approveExpenses = async (req, res) => {
+    try {
+        const { expenseIds } = req.body;
+        const approvedBy = req.session.user.id;
+
+        if (!expenseIds || !Array.isArray(expenseIds) || expenseIds.length === 0) {
+            return res.status(400).json({ success: false, message: 'No expenses selected' });
+        }
+
+        const approved = await Expense.approveMultiple(expenseIds, approvedBy);
+        res.json({ success: true, message: `${approved.length} expense(s) approved`, expenses: approved });
+    } catch (error) {
+        console.error('Error approving expenses:', error);
+        res.status(500).json({ success: false, message: 'Error approving expenses: ' + error.message });
+    }
+};
+
+exports.rejectExpense = async (req, res) => {
+    try {
+        const { expenseId, rejectionReason } = req.body;
+        const approvedBy = req.session.user.id;
+
+        if (!expenseId) {
+            return res.status(400).json({ success: false, message: 'Expense ID required' });
+        }
+        if (!rejectionReason || rejectionReason.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Rejection reason required' });
+        }
+
+        const rejected = await Expense.reject(expenseId, approvedBy, rejectionReason);
+        res.json({ success: true, message: 'Expense rejected', expense: rejected });
+    } catch (error) {
+        console.error('Error rejecting expense:', error);
+        res.status(500).json({ success: false, message: 'Error rejecting expense: ' + error.message });
+    }
+};
+
+exports.approveAdvances = async (req, res) => {
+    try {
+        const { advanceIds } = req.body;
+        const approvedBy = req.session.user.id;
+
+        if (!advanceIds || !Array.isArray(advanceIds) || advanceIds.length === 0) {
+            return res.status(400).json({ success: false, message: 'No advances selected' });
+        }
+
+        const approved = await Advance.approveMultiple(advanceIds, approvedBy);
+        res.json({ success: true, message: `${approved.length} advance(s) approved`, advances: approved });
+    } catch (error) {
+        console.error('Error approving advances:', error);
+        res.status(500).json({ success: false, message: 'Error approving advances: ' + error.message });
+    }
+};
+
+exports.rejectAdvance = async (req, res) => {
+    try {
+        const { advanceId, rejectionReason } = req.body;
+        const approvedBy = req.session.user.id;
+
+        if (!advanceId) {
+            return res.status(400).json({ success: false, message: 'Advance ID required' });
+        }
+        if (!rejectionReason || rejectionReason.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Rejection reason required' });
+        }
+
+        const rejected = await Advance.reject(advanceId, approvedBy, rejectionReason);
+        res.json({ success: true, message: 'Advance rejected', advance: rejected });
+    } catch (error) {
+        console.error('Error rejecting advance:', error);
+        res.status(500).json({ success: false, message: 'Error rejecting advance: ' + error.message });
+    }
+};
+
+exports.finishTrip = async (req, res) => {
+    try {
+        const { tripId } = req.body;
+
+        if (!tripId) {
+            return res.status(400).json({ success: false, message: 'Trip ID required' });
+        }
+
+        const trip = await Trip.findById(parseInt(tripId));
+        if (!trip) {
+            return res.status(404).json({ success: false, message: 'Trip not found' });
+        }
+
+        if (trip.status !== 'approved') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Only approved trips can be marked as finished' 
+            });
+        }
+
+        const updated = await Trip.updateStatus(parseInt(tripId), 'finished');
+        res.json({ success: true, message: 'Trip marked as finished', trip: updated });
+    } catch (error) {
+        console.error('Error finishing trip:', error);
+        res.status(500).json({ success: false, message: 'Error finishing trip: ' + error.message });
     }
 }

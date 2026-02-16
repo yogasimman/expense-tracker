@@ -50,7 +50,7 @@ document.getElementById('selectUser').addEventListener('change', function() {
                 tripSelect.innerHTML = '<option selected>Select</option>';
                 trips.forEach(trip => {
                     const option = document.createElement('option');
-                    option.value = trip._id;
+                    option.value = trip.id;
                     option.textContent = trip.tripName;
                     tripSelect.appendChild(option);
                 });

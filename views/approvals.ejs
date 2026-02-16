@@ -63,10 +63,10 @@
                     </tr>
                 <% } else { %>
                     <% pendingTrips.forEach(trip => { %>
-                        <tr data-id="<%= trip._id %>">
+                        <tr data-id="<%= trip.id %>">
                             <td>Trip</td>
-                            <td><%= trip.submitter %></td>
-                            <td><%= trip.tripName %></td>
+                            <td><%= trip.user_name || 'N/A' %></td>
+                            <td><%= trip.trip_name %></td>
                             <td>
                                 <span class="status-indicator status-pending">Pending</span>
                                 <button class="btn btn-link edit-button" title="Edit">
@@ -76,10 +76,10 @@
                         </tr>
                     <% }); %>
                     <% pendingReports.forEach(report => { %>
-                        <tr data-id="<%= report._id %>">
+                        <tr data-id="<%= report.id %>">
                             <td>Report</td>
-                            <td><%= report.userId.name %></td>
-                            <td><%= report.reportName %></td>
+                            <td><%= report.user_name || 'N/A' %></td>
+                            <td><%= report.report_name %></td>
                             <td>
                                 <span class="status-indicator status-pending">Pending</span>
                                 <button class="btn btn-link edit-button" title="Edit">
@@ -114,11 +114,11 @@
                     </tr>
                 <% } else { %>
                     <% trips.forEach(trip => { %>
-                        <tr data-id="<%= trip._id %>">
-                            <td><%= trip.submitter %></td>
-                            <td><%= trip._id %></td>
-                            <td><%= trip.tripName %></td>
-                            <td><%= trip.travelType %></td>
+                        <tr data-id="<%= trip.id %>" class="trip-row" style="cursor: pointer;" onclick="viewTripDetails(<%= trip.id %>)">
+                            <td><%= trip.user_name || 'N/A' %></td>
+                            <td><%= trip.id %></td>
+                            <td><%= trip.trip_name %></td>
+                            <td><%= trip.travel_type %></td>
                             <td><span class="status-indicator status-<%= trip.status.toLowerCase() %>"><%= trip.status %></span></td>
                         </tr>
                     <% }); %>
@@ -146,10 +146,10 @@
                     </tr>
                 <% } else { %>
                     <% reports.forEach(report => { %>
-                        <tr data-id="<%= report._id %>">
-                            <td><%= report.userId.name %></td>
-                            <td><%= report.reportName %></td>
-                            <td><%= report.businessPurpose %></td>
+                        <tr data-id="<%= report.id %>">
+                            <td><%= report.user_name || 'N/A' %></td>
+                            <td><%= report.report_name %></td>
+                            <td><%= report.business_purpose %></td>
                             <td><span class="status-indicator status-<%= report.status.toLowerCase() %>"><%= report.status %></span></td>
                         </tr>
                     <% }); %>
@@ -219,6 +219,11 @@
 
     // Initialize the view to show the correct content
     setActiveTab('tab-pending'); // This sets the initial active tab and content on page load
+
+    // Function to navigate to trip details page
+    function viewTripDetails(tripId) {
+        window.location.href = `/trip-details/${tripId}`;
+    }
 
     let currentApprovalId; // This will hold the ID of the current trip or report
     let currentApprovalType; // This will hold the type of the current approval (trip/report)

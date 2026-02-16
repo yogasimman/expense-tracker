@@ -1,68 +1,48 @@
 const express = require('express');
 const router = express.Router();
-const Advance = require('../models/advancesModel');
-const Expense = require('../models/expenseModel');
-const Trip = require('../models/tripModel');
-const Report = require('../models/reportsModel');
-const Category = require('../models/categoryModel');
+const AnalyticsHelper = require('../controllers/analyticsHelper');
+const isAuthenticated = require('../middlewares/authMiddleware');
 
-// Route to render analytics page
-router.get('/analytics', async (req, res) => {
-    const userId = req.user._id;
+// API route for analytics data (JSON)
+router.get('/data', isAuthenticated, async (req, res) => {
+    const userId = req.session.user.id;
+    const isAdmin = req.session.user.role === 'admin';
 
     try {
-        // Fetching Expenses by Category
-        const expenses = await Expense.aggregate([
-            { $match: { userId } },
-            { $group: { _id: "$categoryId", totalAmount: { $sum: "$amount" } } },
-        ]);
-        
-        const categories = await Category.find({ _id: { $in: expenses.map(e => e._id) } });
-        const expenseCategories = categories.map(category => category.name);
-        const expenseAmounts = expenses.map(e => e.totalAmount);
+        const expenses = await AnalyticsHelper.getUserExpensesByCategory(userId);
+        const tripCounts = await AnalyticsHelper.getUserTripsByType(userId);
+        const advances = await AnalyticsHelper.getUserAdvancesByCurrency(userId);
+        const reportStatuses = await AnalyticsHelper.getUserReportsByStatus(userId);
 
-        // Fetching Trips Count by Travel Type
-        const trips = await Trip.aggregate([
-            { $match: { userId } },
-            { $group: { _id: "$travelType", count: { $sum: 1 } } }
-        ]);
-        
-        // Initialize tripCounts with defaults
-        const tripCounts = trips.reduce((acc, trip) => {
-            acc[trip._id] = trip.count; // Sets count for each travelType
-            return acc;
-        }, { local: 0, domestic: 0, international: 0 });
+        const result = {
+            expenseCategories: expenses.map(e => e.name),
+            expenseAmounts: expenses.map(e => parseFloat(e.total_amount)),
+            tripCounts: [tripCounts.local, tripCounts.domestic, tripCounts.international],
+            advanceLabels: advances.map(a => a.currency),
+            advanceAmounts: advances.map(a => parseFloat(a.total_amount)),
+            reportStatuses: [reportStatuses.submitted, reportStatuses.approved, reportStatuses.rejected]
+        };
 
-        // Fetching Advances by Currency
-        const advances = await Advance.aggregate([
-            { $match: { userId } },
-            { $group: { _id: "$currency", totalAmount: { $sum: "$amount" } } }
-        ]);
-        const advanceAmounts = advances.map(a => a.totalAmount);
+        if (isAdmin) {
+            const overallExpenses = await AnalyticsHelper.getOverallExpensesByCategory();
+            const overallTripCounts = await AnalyticsHelper.getOverallTripsByType();
+            const overallAdvances = await AnalyticsHelper.getOverallAdvancesByCurrency();
+            const overallReportStatuses = await AnalyticsHelper.getOverallReportsByStatus();
 
-        // Fetching Reports Status
-        const reports = await Report.aggregate([
-            { $match: { userId } },
-            { $group: { _id: "$status", count: { $sum: 1 } } }
-        ]);
-        
-        const reportStatuses = reports.reduce((acc, report) => {
-            acc[report._id] = report.count; // Sets count for each report status
-            return acc;
-        }, { submitted: 0, approved: 0, rejected: 0 });
+            result.overall = {
+                expenseCategories: overallExpenses.map(e => e.name),
+                expenseAmounts: overallExpenses.map(e => parseFloat(e.total_amount)),
+                tripCounts: [overallTripCounts.local, overallTripCounts.domestic, overallTripCounts.international],
+                advanceLabels: overallAdvances.map(a => a.currency),
+                advanceAmounts: overallAdvances.map(a => parseFloat(a.total_amount)),
+                reportStatuses: [overallReportStatuses.submitted, overallReportStatuses.approved, overallReportStatuses.rejected]
+            };
+        }
 
-        // Render the analytics view
-        res.render('analytics', {
-            user: req.user,
-            expenseCategories,
-            expenseAmounts,
-            tripCounts: Object.values(tripCounts), // Convert to array for EJS
-            advanceAmounts,
-            reportStatuses: Object.values(reportStatuses) // Convert to array for EJS
-        });
+        res.json(result);
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error'); // Return a 500 error on failure
+        console.error('Analytics error:', err);
+        res.status(500).json({ error: 'Server Error' });
     }
 });
 

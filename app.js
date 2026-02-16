@@ -1,33 +1,29 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const pgSession = require('connect-pg-simple')(session);
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const ajaxRoutes = require('./routes/ajaxRoutes');
 const analyticsRoutes = require('./routes/analytics')
+const apiRoutes = require('./routes/apiRoutes');
 const error404 = require('./middlewares/404Middleware');
 const path = require('path');
 const Trip = require('./models/tripModel');
+const Expense = require('./models/expenseModel');
 const multer = require('multer');
-const Grid = require('gridfs-stream');
 const app = express();
-const { GridFsStorage } = require('multer-gridfs-storage');
 const crypto = require('crypto');
+const { pool } = require('./config/database');
 
-
-    // MongoDB Atlas connection
-    const mongoURI = 'mongodb://localhost:27017/express-tracker';
-    mongoose.connect(mongoURI,{
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    
-    })
-    .then(() => {
-        console.log('MongoDB connected');
-        initGridFS();  // Initialize GridFS after connection is established
-    })
-        .catch(err => console.log(err));
+    // Test PostgreSQL connection
+    pool.query('SELECT NOW()', (err, res) => {
+        if (err) {
+            console.error('Error connecting to PostgreSQL:', err);
+        } else {
+            console.log('PostgreSQL connected successfully at:', res.rows[0].now);
+        }
+    });
 
     // Middleware
     app.use(express.urlencoded({ extended: true }));
@@ -40,89 +36,84 @@ const crypto = require('crypto');
 
     // Session middleware
     app.use(session({
+        store: new pgSession({
+            pool: pool,
+            tableName: 'sessions'
+        }),
         secret: 'your_secret_key',
         resave: false,
         saveUninitialized: false,
-        store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/express-tracker' }),
         cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
     }));
 
     // Routes
+    app.use('/api', apiRoutes);
     app.use('/', authRoutes);
     app.use('/ajax', ajaxRoutes);
     app.use('/analytics', analyticsRoutes); // Use the analytics routes
 
     // Route to fetch trips for a selected user (only for admins)
     app.get('/trips/:userId', async (req, res) => {
-        try {   
-            const userId = req.params.userId; // Get user ID from the URL
-            const trips = await Trip.find({ userId: userId }, { tripName: 1 }); // Fetch trips for the selected user
-            res.json(trips); // Send trips as JSON response
+        try {
+            const userId = req.params.userId;
+            const trips = await Trip.findByUserId(userId);
+            // Return only trip ID and name
+            const tripList = trips.map(t => ({ _id: t.id, id: t.id, tripName: t.tripName || t.trip_name }));
+            res.json(tripList);
         } catch (error) {
             console.error('Error fetching trips:', error);
             res.status(500).send('Server Error');
         }
     });
 
-    let gfs;
-let conn = mongoose.connection;
+// Configure multer for file storage in memory
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
-function initGridFS() {
-    conn.once('open', () => {
-        gfs = Grid(conn.db, mongoose.mongo);
-        gfs.collection('receipts'); // Set the collection for GridFS
-        console.log('GridFS initialized');
-    });
-}
-
-// Create storage engine for GridFS
-const storage = new GridFsStorage({
-    url: mongoURI,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            crypto.randomBytes(16, (err, buf) => {
-                if (err) {
-                    return reject(err);
-                }
-                const filename = buf.toString('hex') + path.extname(file.originalname);
-                const fileInfo = {
-                    filename: filename,
-                    bucketName: 'receipts'  // The collection in MongoDB where the files will be stored
-                };
-                resolve(fileInfo);
-            });
-        });
+// Handle the route for uploading receipts
+app.post('/upload-receipts', upload.array('receipts', 5), async (req, res) => {
+    try {
+        const fileIds = [];
+        
+        // Note: This endpoint now just stores files temporarily in memory
+        // The actual saving to database happens when the expense is created
+        // We'll return file information that can be used later
+        const filesInfo = req.files.map(file => ({
+            filename: crypto.randomBytes(16).toString('hex') + path.extname(file.originalname),
+            original_filename: file.originalname,
+            content_type: file.mimetype,
+            file_size: file.size,
+            file_data: file.buffer
+        }));
+        
+        res.json({ files: filesInfo });
+    } catch (error) {
+        console.error('Error uploading receipts:', error);
+        res.status(500).json({ error: 'Failed to upload receipts' });
     }
 });
 
-const upload = multer({ storage });
-
-// Handle the route for uploading files
-app.post('/upload-receipts', upload.array('receipts', 5), (req, res) => {
-    const fileIds = req.files.map(file => file.id);  // Extract the ObjectIds of the uploaded files
-    res.json({ fileIds });  // Send back the file ids to reference them in the expense record
-});
-
 // Route to display a specific receipt by file ID
-app.get('/file/:fileId', (req, res) => {
-    const fileId = new mongoose.Types.ObjectId(req.params.fileId);
-    gfs.files.findOne({ _id: fileId }, (err, file) => {
-        if (!file || file.length === 0) {
+app.get('/file/:fileId', async (req, res) => {
+    try {
+        const fileId = parseInt(req.params.fileId);
+        const receipt = await Expense.getReceiptById(fileId);
+        
+        if (!receipt) {
             return res.status(404).json({ err: 'No file exists' });
         }
 
-        // Check if file is an image
-        if (file.contentType.startsWith('image/')) {
-            // Stream the image file
-            const readstream = gfs.createReadStream(file._id);
-            readstream.pipe(res);
-        } else {
-            // Handle other file types (PDF, DOC, etc.)
-            res.set('Content-Type', file.contentType);
-            const readstream = gfs.createReadStream(file._id);
-            readstream.pipe(res);
-        }
-    });
+        // Set content type and send file
+        res.set('Content-Type', receipt.content_type);
+        res.set('Content-Disposition', `inline; filename="${receipt.original_filename}"`);
+        res.send(receipt.file_data);
+    } catch (error) {
+        console.error('Error retrieving file:', error);
+        res.status(500).json({ error: 'Failed to retrieve file' });
+    }
 });
 
 
@@ -136,14 +127,10 @@ app.get('/file/:fileId', (req, res) => {
                 return res.status(400).json({ success: false, message: 'Invalid input' });
             }
     
-            console.log("Updating status for ID:", id, "Status:", status); // Log incoming values
+            console.log("Updating status for ID:", id, "Status:", status);
     
             // Update the trip status
-            const updatedTrip = await Trip.findByIdAndUpdate(
-                id,
-                { status: status },
-                { new: true, runValidators: true }
-            );
+            const updatedTrip = await Trip.updateStatus(id, status);
     
             if (!updatedTrip) {
                 return res.status(404).json({ success: false, message: 'Trip not found' });
@@ -156,6 +143,16 @@ app.get('/file/:fileId', (req, res) => {
         }
     });
     
+    // Serve Vue.js frontend build (production)
+    const vueBuildPath = path.join(__dirname, 'frontend', 'dist');
+    if (require('fs').existsSync(vueBuildPath)) {
+        app.use(express.static(vueBuildPath));
+        // SPA fallback - serve index.html for any non-API routes
+        app.get(/^\/app(\/.*)?$/, (req, res) => {
+            res.sendFile(path.join(vueBuildPath, 'index.html'));
+        });
+    }
+
     // 404 error middleware
     app.use(error404);
 
