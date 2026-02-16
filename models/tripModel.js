@@ -11,7 +11,7 @@ class Trip {
      */
     static async create(tripData) {
         return await transaction(async (client) => {
-            const { tripName, travelType, status, userId, itinerary } = tripData;
+            const { tripName, travelType, status, userId, itinerary, description } = tripData;
             
             // Validate required fields
             if (!tripName || tripName.trim() === '') {
@@ -23,11 +23,11 @@ class Trip {
             
             // Insert trip
             const tripSql = `
-                INSERT INTO trips (trip_name, travel_type, status)
-                VALUES ($1, $2, $3)
+                INSERT INTO trips (trip_name, travel_type, status, description)
+                VALUES ($1, $2, $3, $4)
                 RETURNING *
             `;
-            const tripResult = await client.query(tripSql, [tripName.trim(), travelType, status || 'pending']);
+            const tripResult = await client.query(tripSql, [tripName.trim(), travelType, status || 'pending', description || null]);
             const trip = tripResult.rows[0];
             
             // Add trip users (support array of user IDs)
@@ -118,7 +118,7 @@ class Trip {
      */
     static async update(id, tripData) {
         return await transaction(async (client) => {
-            const { tripName, travelType, status, userId, itinerary } = tripData;
+            const { tripName, travelType, status, userId, itinerary, description } = tripData;
             
             // Update trip basic info
             const fields = [];
@@ -138,6 +138,11 @@ class Trip {
             if (status !== undefined) {
                 fields.push(`status = $${paramCount}`);
                 values.push(status);
+                paramCount++;
+            }
+            if (description !== undefined) {
+                fields.push(`description = $${paramCount}`);
+                values.push(description);
                 paramCount++;
             }
 
@@ -254,6 +259,7 @@ class Trip {
             tripName: rawTrip.trip_name,
             travelType: rawTrip.travel_type,
             status: rawTrip.status,
+            description: rawTrip.description,
             created_at: rawTrip.created_at,
             updated_at: rawTrip.updated_at,
             // Keep both formats for compatibility
@@ -261,9 +267,13 @@ class Trip {
             travel_type: rawTrip.travel_type
         };
         
-        // Get user IDs
-        const userResult = await client.query('SELECT user_id FROM trip_users WHERE trip_id = $1', [tripId]);
+        // Get user IDs and names
+        const userResult = await client.query(
+            'SELECT tu.user_id, u.name FROM trip_users tu LEFT JOIN users u ON tu.user_id = u.id WHERE tu.trip_id = $1',
+            [tripId]
+        );
         trip.userId = userResult.rows.map(row => row.user_id);
+        trip.user_name = userResult.rows.map(row => row.name).filter(n => n).join(', ');
         
         // Get itinerary
         const itinerary = {};

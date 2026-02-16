@@ -6,6 +6,6 @@ module.exports = (req, res, next) => {
         if (req.originalUrl.startsWith('/api/')) {
             return res.status(401).json({ success: false, message: 'Not authenticated' });
         }
-        res.redirect('/login');
+        res.redirect('/app/login');
     }
 };

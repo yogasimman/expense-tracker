@@ -103,7 +103,7 @@ async function submit() {
       amount: form.amount,
       currency: form.currency,
       paidThrough: form.paidThrough,
-      reference: form.reference,
+      referenceId: form.reference,
       tripId: form.tripId,
       notes: form.notes
     })
@@ -118,7 +118,7 @@ async function submit() {
 
 onMounted(async () => {
   await tripStore.fetchTrips()
-  trips.value = tripStore.trips.filter(t => t.status === 'pending' || t.status === 'approved')
+  trips.value = tripStore.trips.filter(t => t.status === 'approved')
 })
 </script>
 

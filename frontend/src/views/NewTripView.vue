@@ -10,6 +10,12 @@
           <input v-model="form.tripName" type="text" class="form-input" placeholder="eg: Trip to New York" required />
         </div>
 
+        <!-- Trip Description -->
+        <div class="form-group">
+          <label class="form-label">Trip Description</label>
+          <textarea v-model="form.description" class="form-input" rows="3" placeholder="Describe the purpose of this trip"></textarea>
+        </div>
+
         <!-- Admin: Select Users -->
         <div v-if="auth.isAdmin" class="form-group">
           <label class="form-label">Select Users</label>
@@ -247,6 +253,7 @@ const openSections = reactive({
 
 const form = reactive({
   tripName: '',
+  description: '',
   travelType: 'domestic',
   selectedUsers: [],
   itinerary: {
@@ -317,6 +324,7 @@ async function submit() {
   try {
     const data = {
       tripName: form.tripName,
+      description: form.description,
       travelType: form.travelType,
       itinerary: {
         flights: openSections.flights ? form.itinerary.flights : [],

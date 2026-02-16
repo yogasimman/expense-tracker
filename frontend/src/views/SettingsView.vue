@@ -72,7 +72,7 @@
       </div>
 
       <!-- Users (Admin) -->
-      <div v-if="auth.isAdmin" class="card">
+      <div v-if="auth.isAdmin" class="card full-width">
         <div class="card-header"><span class="card-title">Manage Users</span></div>
         <div class="card-body">
           <div v-if="usersLoading" class="loading-spinner" style="width:24px;height:24px"></div>
@@ -81,10 +81,105 @@
               <div>
                 <span class="user-name">{{ u.name }}</span>
                 <span class="user-email">{{ u.email }}</span>
+                <span v-if="u.department" class="user-dept">{{ u.department }}</span>
               </div>
-              <span class="user-role" :class="u.role">{{ u.role }}</span>
+              <div class="user-actions">
+                <span class="user-role" :class="u.role">{{ u.role }}</span>
+                <button class="btn btn-ghost btn-sm" title="Edit" @click="openEditUser(u)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                  v-if="u.id !== auth.user?.id"
+                  class="btn btn-ghost btn-sm text-danger"
+                  title="Delete"
+                  @click="confirmDeleteUser(u)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- Edit User Modal -->
+          <div v-if="editingUser" class="modal-overlay" @click.self="editingUser = null">
+            <div class="modal-box">
+              <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="btn btn-ghost btn-sm" @click="editingUser = null">&times;</button>
+              </div>
+              <form @submit.prevent="saveEditUser">
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input v-model="editForm.name" class="form-input" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input v-model="editForm.email" type="email" class="form-input" required />
+                  </div>
+                </div>
+                <div class="grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Employee ID</label>
+                    <input v-model="editForm.employee_id" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Mobile</label>
+                    <input v-model="editForm.mobile" class="form-input" />
+                  </div>
+                </div>
+                <div class="grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input v-model="editForm.department" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Designation</label>
+                    <input v-model="editForm.designation" class="form-input" />
+                  </div>
+                </div>
+                <div class="grid-2 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select v-model="editForm.role" class="form-input">
+                      <option value="submitter">Submitter</option>
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">New Password <small>(leave blank to keep)</small></label>
+                    <input v-model="editForm.password" type="password" class="form-input" placeholder="Unchanged" />
+                  </div>
+                </div>
+                <div class="modal-footer mt-3">
+                  <button type="button" class="btn btn-outline btn-sm" @click="editingUser = null">Cancel</button>
+                  <button type="submit" class="btn btn-primary btn-sm" :disabled="editSaving">
+                    {{ editSaving ? 'Saving\u2026' : 'Save Changes' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Delete Confirmation Modal -->
+          <div v-if="deletingUser" class="modal-overlay" @click.self="deletingUser = null">
+            <div class="modal-box modal-sm">
+              <div class="modal-header">
+                <h3>Delete User</h3>
+                <button class="btn btn-ghost btn-sm" @click="deletingUser = null">&times;</button>
+              </div>
+              <p>Are you sure you want to delete <strong>{{ deletingUser.name }}</strong> ({{ deletingUser.email }})?</p>
+              <p class="text-muted">This action cannot be undone.</p>
+              <div class="modal-footer mt-3">
+                <button class="btn btn-outline btn-sm" @click="deletingUser = null">Cancel</button>
+                <button class="btn btn-danger btn-sm" :disabled="deleting" @click="doDeleteUser">
+                  {{ deleting ? 'Deleting\u2026' : 'Delete' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <form @submit.prevent="addUser" class="add-user-form mt-4">
             <h4 class="form-label">Add User</h4>
             <div class="grid-2">
@@ -97,6 +192,14 @@
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
+            </div>
+            <div class="grid-2 mt-2">
+              <input v-model="newUser.department" class="form-input" placeholder="Department" />
+              <input v-model="newUser.designation" class="form-input" placeholder="Designation" />
+            </div>
+            <div class="grid-2 mt-2">
+              <input v-model="newUser.employee_id" class="form-input" placeholder="Employee ID" />
+              <input v-model="newUser.mobile" class="form-input" placeholder="Mobile" />
             </div>
             <button type="submit" class="btn btn-primary btn-sm mt-3" :disabled="addingUser">Add User</button>
           </form>
@@ -122,12 +225,17 @@ const saving = ref(false)
 const pwSaving = ref(false)
 const usersLoading = ref(false)
 const addingUser = ref(false)
+const editSaving = ref(false)
+const deleting = ref(false)
 const users = ref([])
 const newCat = ref('')
+const editingUser = ref(null)
+const deletingUser = ref(null)
 
 const profile = reactive({ name: '', email: '' })
 const pw = reactive({ current: '', newPw: '', confirm: '' })
-const newUser = reactive({ name: '', email: '', password: '', role: 'user' })
+const newUser = reactive({ name: '', email: '', password: '', role: 'user', department: '', designation: '', employee_id: '', mobile: '' })
+const editForm = reactive({ name: '', email: '', employee_id: '', mobile: '', department: '', designation: '', role: '', password: '' })
 
 async function updateProfile() {
   saving.value = true
@@ -168,11 +276,48 @@ async function addUser() {
   addingUser.value = true
   try {
     await api.addUser(newUser)
-    newUser.name = ''; newUser.email = ''; newUser.password = ''; newUser.role = 'user'
+    Object.assign(newUser, { name: '', email: '', password: '', role: 'user', department: '', designation: '', employee_id: '', mobile: '' })
     toast.success('User added')
     await loadUsers()
   } catch (e) { toast.error(e.message) }
   finally { addingUser.value = false }
+}
+
+function openEditUser(u) {
+  editingUser.value = u
+  Object.assign(editForm, {
+    name: u.name || '', email: u.email || '', employee_id: u.employee_id || '',
+    mobile: u.mobile || '', department: u.department || '', designation: u.designation || '',
+    role: u.role || 'user', password: ''
+  })
+}
+
+async function saveEditUser() {
+  editSaving.value = true
+  try {
+    const data = { ...editForm }
+    if (!data.password) delete data.password
+    await api.updateUser(editingUser.value.id, data)
+    toast.success('User updated')
+    editingUser.value = null
+    await loadUsers()
+  } catch (e) { toast.error(e.message) }
+  finally { editSaving.value = false }
+}
+
+function confirmDeleteUser(u) {
+  deletingUser.value = u
+}
+
+async function doDeleteUser() {
+  deleting.value = true
+  try {
+    await api.deleteUser(deletingUser.value.id)
+    toast.success('User deleted')
+    deletingUser.value = null
+    await loadUsers()
+  } catch (e) { toast.error(e.message) }
+  finally { deleting.value = false }
 }
 
 async function loadUsers() {
@@ -219,12 +364,42 @@ onMounted(async () => {
 }
 .user-name { font-weight: 500; font-size: var(--font-size-sm); display: block; }
 .user-email { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.user-dept { font-size: var(--font-size-xs); color: var(--color-text-secondary); display: block; }
+.user-actions { display: flex; align-items: center; gap: var(--space-2); }
 .user-role {
   font-size: var(--font-size-xs); font-weight: 600; text-transform: uppercase;
   padding: var(--space-1) var(--space-2); border-radius: var(--radius-full);
 }
 .user-role.admin { background: var(--color-primary-light); color: var(--color-primary); }
-.user-role.user { background: var(--color-surface-hover); color: var(--color-text-secondary); }
+.user-role.user, .user-role.submitter { background: var(--color-surface-hover); color: var(--color-text-secondary); }
+
+.full-width { grid-column: 1 / -1; }
+
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal-box {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-sm { max-width: 400px; }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.modal-header h3 { margin: 0; font-size: var(--font-size-lg); }
+.modal-footer { display: flex; justify-content: flex-end; gap: var(--space-2); }
+
+.btn-danger {
+  background: var(--color-danger, #ef4444); color: #fff; border: none;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+  cursor: pointer; font-weight: 500;
+}
+.btn-danger:hover { opacity: 0.9; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .mt-2 { margin-top: var(--space-2); }

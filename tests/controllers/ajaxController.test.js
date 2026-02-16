@@ -1,6 +1,6 @@
 /**
  * Ajax Controller Tests
- * Tests all AJAX API endpoints (add-trip, add-expense, advances, categories, reports)
+ * Tests all AJAX API endpoints (add-trip, add-expense, advances, categories)
  */
 const { cleanTestData, createTestUser, createTestTrip, createTestCategory, closePool } = require('../setup');
 
@@ -270,58 +270,16 @@ describe('Ajax Controller', () => {
         });
     });
 
-    describe('addReport()', () => {
-        it('should add a report successfully', async () => {
-            const req = mockReq({
-                body: {
-                    reportName: 'TEST_Ajax Report',
-                    businessPurpose: 'Testing',
-                    tripId: testTrip.id,
-                    duration: { startDate: '2024-01-01', endDate: '2024-01-15' }
-                },
-                session: { user: { id: testUser.id } }
-            });
-            const res = mockRes();
-            await ajaxController.addReport(req, res);
-            expect(res._json.success).toBe(true);
-        });
-
-        it('should reject missing fields', async () => {
-            const req = mockReq({
-                body: { reportName: 'TEST_Incomplete' },
-                session: { user: { id: testUser.id } }
-            });
-            const res = mockRes();
-            await ajaxController.addReport(req, res);
-            expect(res._status).toBe(400);
-        });
-
-        it('should reject missing duration dates', async () => {
-            const req = mockReq({
-                body: {
-                    reportName: 'TEST_NoDates',
-                    businessPurpose: 'Test',
-                    tripId: testTrip.id,
-                    duration: {}
-                },
-                session: { user: { id: testUser.id } }
-            });
-            const res = mockRes();
-            await ajaxController.addReport(req, res);
-            expect(res._status).toBe(400);
-        });
-    });
-
     describe('advances() - GET page', () => {
-        it('should render advances page with trips', async () => {
+        it('should return JSON with trips', async () => {
             const req = mockReq({
                 url: '/add-advances',
                 session: { user: { id: testUser.id } }
             });
             const res = mockRes();
             await ajaxController.advances(req, res);
-            expect(res._rendered.view).toBe('advances');
-            expect(Array.isArray(res._rendered.data.trips)).toBe(true);
+            expect(res._json).toBeDefined();
+            expect(Array.isArray(res._json.trips)).toBe(true);
         });
     });
 });

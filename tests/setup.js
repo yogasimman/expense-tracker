@@ -25,7 +25,6 @@ async function cleanTestData() {
         await client.query("DELETE FROM receipts WHERE expense_id IN (SELECT id FROM expenses WHERE expense_title LIKE 'TEST_%')");
         await client.query("DELETE FROM expenses WHERE expense_title LIKE 'TEST_%'");
         await client.query("DELETE FROM advances WHERE notes LIKE 'TEST_%'");
-        await client.query("DELETE FROM reports WHERE report_name LIKE 'TEST_%'");
         await client.query("DELETE FROM flights WHERE trip_id IN (SELECT id FROM trips WHERE trip_name LIKE 'TEST_%')");
         await client.query("DELETE FROM buses WHERE trip_id IN (SELECT id FROM trips WHERE trip_name LIKE 'TEST_%')");
         await client.query("DELETE FROM trains WHERE trip_id IN (SELECT id FROM trips WHERE trip_name LIKE 'TEST_%')");

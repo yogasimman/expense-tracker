@@ -2,7 +2,6 @@ const User = require('../models/userModel');
 const Trip = require('../models/tripModel');
 const Expense = require('../models/expenseModel');
 const Category = require('../models/categoryModel');
-const Reports = require('../models/reportsModel');
 const Advance = require('../models/advancesModel');
 
 exports.add_trip = async (req, res) => {
@@ -125,8 +124,8 @@ exports.advances = async (req, res) => {
 
         console.log('Fetched trips:', JSON.stringify(tripList, null, 2));
 
-        // Render the EJS view and pass trips
-        res.render('advances', { currentPath: req.url, trips: tripList });
+        // Return JSON data
+        res.json({ trips: tripList });
 
     } catch (error) {
         console.error('Error fetching trips:', error);
@@ -247,34 +246,6 @@ exports.addAdvances = async (req, res) => {
     } catch (error) {
         console.error('Error recording advance:', error);
         res.status(500).json({ success: false, message: 'An error occurred while recording the advance' });
-    }
-}
-
-exports.addReport = async (req, res) => {
-    try {
-        const { reportName, businessPurpose, tripId, duration } = req.body;
-        const userId = req.session.user.id;
-        
-        if (!reportName || !businessPurpose || !tripId || !duration) {
-            return res.status(400).json({ success: false, message: 'Missing required fields' });
-        }
-
-        if (!duration.startDate || !duration.endDate) {
-            return res.status(400).json({ success: false, message: 'Start date and end date are required' });
-        }
-
-        const newReport = await Reports.create({
-            userId: parseInt(userId),
-            tripId: parseInt(tripId),
-            reportName,
-            businessPurpose,
-            duration,
-        });
-
-        res.json({ success: true, message: 'Report added successfully' });
-    } catch (error) {
-        console.error('Error adding report:', error);
-        res.status(500).json({ success: false, message: 'Failed to add report: ' + error.message });
     }
 }
 

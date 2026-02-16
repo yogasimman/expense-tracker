@@ -9,7 +9,6 @@ const Trip = require('../models/tripModel');
 const Expense = require('../models/expenseModel');
 const Advance = require('../models/advancesModel');
 const Category = require('../models/categoryModel');
-const Reports = require('../models/reportsModel');
 const bcrypt = require('bcrypt');
 
 // ─── AUTH ──────────────────────────────────────────────
@@ -122,6 +121,24 @@ router.put('/users/:id', isAuthenticated, async (req, res) => {
     }
 });
 
+router.delete('/users/:id', isAuthenticated, async (req, res) => {
+    try {
+        if (req.session.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Admin only' });
+        }
+        const userId = parseInt(req.params.id);
+        if (userId === req.session.user.id) {
+            return res.status(400).json({ message: 'Cannot delete your own account' });
+        }
+        const deleted = await User.delete(userId);
+        if (!deleted) return res.status(404).json({ message: 'User not found' });
+        res.json({ success: true, message: 'User deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Error deleting user' });
+    }
+});
+
 // ─── TRIPS ─────────────────────────────────────────────
 router.get('/trips', isAuthenticated, async (req, res) => {
     try {
@@ -149,7 +166,13 @@ router.get('/trips/:id', isAuthenticated, async (req, res) => {
         // Get expenses/advances for this trip
         const expenses = await Expense.findAll({ tripId: trip.id });
         const advances = await Advance.findAll({ tripId: trip.id });
-        res.json({ trip, expenses, advances });
+        const stats = {
+            total_expenses: expenses.length,
+            total_expense_amount: expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0),
+            total_advances: advances.length,
+            total_advance_amount: advances.reduce((s, a) => s + parseFloat(a.amount || 0), 0)
+        };
+        res.json({ trip, expenses, advances, stats });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching trip details' });
     }
@@ -157,12 +180,12 @@ router.get('/trips/:id', isAuthenticated, async (req, res) => {
 
 router.post('/trips', isAuthenticated, async (req, res) => {
     try {
-        const { tripName, travelType, itinerary } = req.body;
+        const { tripName, travelType, itinerary, description } = req.body;
         let userId = req.body.userId || req.session.user.id;
         if (typeof userId === 'string') userId = parseInt(userId);
         if (!Array.isArray(userId)) userId = [userId];
 
-        const trip = await Trip.create({ tripName, travelType, userId, itinerary, status: 'pending' });
+        const trip = await Trip.create({ tripName, travelType, userId, itinerary, description, status: 'pending' });
         res.json({ success: true, message: 'Trip created successfully', trip });
     } catch (error) {
         console.error('Error creating trip:', error);
@@ -413,67 +436,67 @@ router.delete('/categories/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ─── REPORTS ───────────────────────────────────────────
-router.get('/reports', isAuthenticated, async (req, res) => {
-    try {
-        const { status } = req.query;
-        const filters = {};
-        if (status) filters.status = status;
-        if (req.session.user.role !== 'admin') {
-            filters.userId = req.session.user.id;
-        }
-        const reports = await Reports.findAll(filters);
-        res.json(reports);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching reports' });
-    }
-});
-
-router.post('/reports', isAuthenticated, async (req, res) => {
-    try {
-        const { reportName, businessPurpose, tripId, fromDate, toDate } = req.body;
-        const userId = req.body.userId || req.session.user.id;
-        const report = await Reports.create({
-            user_id: parseInt(userId), trip_id: parseInt(tripId),
-            report_name: reportName, business_purpose: businessPurpose,
-            from_date: fromDate, to_date: toDate
-        });
-        res.json({ success: true, message: 'Report created successfully', report });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
 // ─── DASHBOARD ─────────────────────────────────────────
 router.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
         const userId = req.session.user.id;
         const isAdmin = req.session.user.role === 'admin';
 
-        const [trips, expenses, advances, reports] = await Promise.all([
+        const [trips, expenses, advances] = await Promise.all([
             Trip.findAll(isAdmin ? {} : { userId }),
             Expense.findAll(isAdmin ? {} : { userId }),
-            Advance.findAll(isAdmin ? {} : { userId }),
-            Reports.findAll(isAdmin ? {} : { userId })
+            Advance.findAll(isAdmin ? {} : { userId })
         ]);
 
         const pendingTrips = trips.filter(t => t.status === 'pending').length;
+        const approvedTrips = trips.filter(t => t.status === 'approved').length;
+        const rejectedTrips = trips.filter(t => t.status === 'rejected').length;
+        const finishedTrips = trips.filter(t => t.status === 'finished').length;
         const pendingExpenses = expenses.filter(e => e.status === 'pending').length;
+        const approvedExpenses = expenses.filter(e => e.status === 'approved').length;
+        const rejectedExpenses = expenses.filter(e => e.status === 'rejected').length;
         const pendingAdvances = advances.filter(a => a.status === 'pending').length;
+        const approvedAdvances = advances.filter(a => a.status === 'approved').length;
+        const rejectedAdvances = advances.filter(a => a.status === 'rejected').length;
         const totalExpenseAmount = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
         const totalAdvanceAmount = advances.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
+
+        // Trip type breakdown
+        const localTrips = trips.filter(t => (t.travelType || t.travel_type) === 'local').length;
+        const domesticTrips = trips.filter(t => (t.travelType || t.travel_type) === 'domestic').length;
+        const internationalTrips = trips.filter(t => (t.travelType || t.travel_type) === 'international').length;
+
+        // Monthly expense trend (last 12 months)
+        const monthlyTrend = new Array(12).fill(0);
+        const now = new Date();
+        expenses.forEach(e => {
+            const d = new Date(e.date || e.created_at);
+            if (d.getFullYear() === now.getFullYear()) {
+                monthlyTrend[d.getMonth()] += parseFloat(e.amount || 0);
+            }
+        });
 
         res.json({
             stats: {
                 totalTrips: trips.length,
                 pendingTrips,
+                approvedTrips,
+                rejectedTrips,
+                finishedTrips,
                 totalExpenses: expenses.length,
                 pendingExpenses,
+                approvedExpenses,
+                rejectedExpenses,
                 totalAdvances: advances.length,
                 pendingAdvances,
+                approvedAdvances,
+                rejectedAdvances,
                 totalExpenseAmount,
                 totalAdvanceAmount,
-                totalReports: reports.length
+                localTrips,
+                domesticTrips,
+                internationalTrips,
+                monthlyTrend
             },
             recentTrips: trips.slice(0, 5),
             recentExpenses: expenses.slice(0, 5)

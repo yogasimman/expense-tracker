@@ -40,7 +40,7 @@
               <label class="form-label">Category *</label>
               <select v-model="form.category" class="form-input" required>
                 <option value="" disabled>Select category</option>
-                <option v-for="cat in categoryStore.categories" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
+                <option v-for="cat in categoryStore.categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
               </select>
             </div>
             <div class="form-group">

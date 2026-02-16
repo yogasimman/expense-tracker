@@ -174,7 +174,6 @@ class User {
                  JOIN trip_users tu ON t.id = tu.trip_id 
                  WHERE tu.user_id = $1) as total_trips,
                 (SELECT COUNT(*) FROM expenses WHERE user_id = $1) as total_expenses,
-                (SELECT COUNT(*) FROM reports WHERE user_id = $1) as total_reports,
                 (SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = $1) as total_expense_amount
         `;
         const result = await query(sql, [userId]);

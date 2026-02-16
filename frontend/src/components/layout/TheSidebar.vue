@@ -50,7 +50,6 @@ const navItems = [
   { to: '/app',          icon: 'bi bi-house-fill',       label: 'Home' },
   { to: '/app/trips',    icon: 'bi bi-airplane-fill',    label: 'Trip' },
   { to: '/app/expenses', icon: 'bi bi-cash-stack',       label: 'Expenses' },
-  { to: '/app/reports',  icon: 'bi bi-card-checklist',   label: 'Reports' },
   { to: '/app/advances', icon: 'bi bi-credit-card',      label: 'Advances' },
   { to: '/app/approvals',icon: 'bi bi-check2-circle',    label: 'Approvals', admin: true },
   { to: '/app/analytics',icon: 'bi bi-bar-chart-fill',   label: 'Analytics' },
@@ -74,7 +73,7 @@ async function handleLogout() {
   left: 0;
   bottom: 0;
   width: 240px;
-  background-color: #2c3e50;
+  background-color: #1e293b;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -132,7 +131,7 @@ async function handleLogout() {
   flex-shrink: 0;
 }
 .nav-item:hover {
-  background-color: #34495e;
+  background-color: #334155;
   transform: translateX(5px);
   color: #fff;
 }

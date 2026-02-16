@@ -18,6 +18,10 @@
           <div v-if="stats"><span class="info-label">Total Expense</span><span class="info-value">₹{{ Number(stats.total_expense_amount || 0).toLocaleString('en-IN') }}</span></div>
           <div v-if="stats"><span class="info-label">Total Advance</span><span class="info-value">₹{{ Number(stats.total_advance_amount || 0).toLocaleString('en-IN') }}</span></div>
         </div>
+        <div v-if="trip.description" class="trip-description mt-3">
+          <span class="info-label">Description</span>
+          <p class="info-value">{{ trip.description }}</p>
+        </div>
       </div>
     </div>
 
@@ -179,17 +183,17 @@ const rejectReason = ref('')
 const rejectTarget = ref(null) // { type: 'expense'|'advance', item?, bulk: bool }
 
 const expenseColumns = [
-  { key: 'title', label: 'Title', sortable: true },
+  { key: 'expense_title', label: 'Title', sortable: true },
   { key: 'amount', label: 'Amount', sortable: true },
-  { key: 'category', label: 'Category' },
+  { key: 'category_name', label: 'Category' },
   { key: 'status', label: 'Status', sortable: true },
-  { key: 'expense_date', label: 'Date', type: 'date' }
+  { key: 'date', label: 'Date', type: 'date' }
 ]
 
 const advanceColumns = [
   { key: 'amount', label: 'Amount', sortable: true },
   { key: 'paid_through', label: 'Paid Through' },
-  { key: 'reference', label: 'Reference' },
+  { key: 'reference_id', label: 'Reference' },
   { key: 'status', label: 'Status', sortable: true }
 ]
 
@@ -354,6 +358,10 @@ onMounted(async () => {
 }
 .info-value { font-weight: 600; font-size: var(--font-size-base); }
 .capitalize { text-transform: capitalize; }
+
+.trip-description { border-top: 1px solid var(--color-border); padding-top: var(--space-3); }
+.trip-description p { margin: 0; white-space: pre-wrap; }
+.mt-3 { margin-top: var(--space-3); }
 
 .mb-4 { margin-bottom: var(--space-4); }
 .me-2 { margin-right: var(--space-2); }

@@ -38,8 +38,6 @@ router.get('/sidebar', isAuthenticated, pageController.sidebar);
 
 router.get('/viewtrips', isAuthenticated, pageController.viewtrips);
 
-router.get('/viewreports', isAuthenticated, pageController.viewreports);
-router.get('/reports',isAuthenticated,pageController.addReports);
 router.get('/trip-details/:tripId', isAuthenticated, pageController.tripDetails);
 
 

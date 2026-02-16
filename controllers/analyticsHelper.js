@@ -106,47 +106,6 @@ class AnalyticsHelper {
         const result = await query(sql);
         return result.rows;
     }
-
-    /**
-     * Get user report counts by status
-     */
-    static async getUserReportsByStatus(userId) {
-        const sql = `
-            SELECT status, COUNT(*) as count
-            FROM reports
-            WHERE user_id = $1
-            GROUP BY status
-        `;
-        const result = await query(sql, [userId]);
-        
-        // Convert to object with default values
-        const reportStatuses = { submitted: 0, approved: 0, rejected: 0 };
-        result.rows.forEach(row => {
-            reportStatuses[row.status] = parseInt(row.count);
-        });
-        
-        return reportStatuses;
-    }
-
-    /**
-     * Get overall report counts by status
-     */
-    static async getOverallReportsByStatus() {
-        const sql = `
-            SELECT status, COUNT(*) as count
-            FROM reports
-            GROUP BY status
-        `;
-        const result = await query(sql);
-        
-        // Convert to object with default values
-        const reportStatuses = { submitted: 0, approved: 0, rejected: 0 };
-        result.rows.forEach(row => {
-            reportStatuses[row.status] = parseInt(row.count);
-        });
-        
-        return reportStatuses;
-    }
 }
 
 module.exports = AnalyticsHelper;

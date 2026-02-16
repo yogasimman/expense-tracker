@@ -12,30 +12,26 @@ router.get('/data', isAuthenticated, async (req, res) => {
         const expenses = await AnalyticsHelper.getUserExpensesByCategory(userId);
         const tripCounts = await AnalyticsHelper.getUserTripsByType(userId);
         const advances = await AnalyticsHelper.getUserAdvancesByCurrency(userId);
-        const reportStatuses = await AnalyticsHelper.getUserReportsByStatus(userId);
 
         const result = {
             expenseCategories: expenses.map(e => e.name),
             expenseAmounts: expenses.map(e => parseFloat(e.total_amount)),
             tripCounts: [tripCounts.local, tripCounts.domestic, tripCounts.international],
             advanceLabels: advances.map(a => a.currency),
-            advanceAmounts: advances.map(a => parseFloat(a.total_amount)),
-            reportStatuses: [reportStatuses.submitted, reportStatuses.approved, reportStatuses.rejected]
+            advanceAmounts: advances.map(a => parseFloat(a.total_amount))
         };
 
         if (isAdmin) {
             const overallExpenses = await AnalyticsHelper.getOverallExpensesByCategory();
             const overallTripCounts = await AnalyticsHelper.getOverallTripsByType();
             const overallAdvances = await AnalyticsHelper.getOverallAdvancesByCurrency();
-            const overallReportStatuses = await AnalyticsHelper.getOverallReportsByStatus();
 
             result.overall = {
                 expenseCategories: overallExpenses.map(e => e.name),
                 expenseAmounts: overallExpenses.map(e => parseFloat(e.total_amount)),
                 tripCounts: [overallTripCounts.local, overallTripCounts.domestic, overallTripCounts.international],
                 advanceLabels: overallAdvances.map(a => a.currency),
-                advanceAmounts: overallAdvances.map(a => parseFloat(a.total_amount)),
-                reportStatuses: [overallReportStatuses.submitted, overallReportStatuses.approved, overallReportStatuses.rejected]
+                advanceAmounts: overallAdvances.map(a => parseFloat(a.total_amount))
             };
         }
 

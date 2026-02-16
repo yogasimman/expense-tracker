@@ -33,26 +33,26 @@ describe('Auth Middleware', () => {
         expect(res._redirectUrl).toBeNull();
     });
 
-    it('should redirect to /login if not authenticated', () => {
-        const req = mockReq({ session: { isAuthenticated: false } });
+    it('should redirect to /app/login if not authenticated', () => {
+        const req = mockReq({ session: { isAuthenticated: false }, originalUrl: '/dashboard' });
         const res = mockRes();
         let nextCalled = false;
         const next = () => { nextCalled = true; };
 
         authMiddleware(req, res, next);
         expect(nextCalled).toBe(false);
-        expect(res._redirectUrl).toBe('/login');
+        expect(res._redirectUrl).toBe('/app/login');
     });
 
-    it('should redirect to /login if session is undefined', () => {
-        const req = { session: {} };
+    it('should redirect to /app/login if session is undefined', () => {
+        const req = { session: {}, originalUrl: '/trips' };
         const res = mockRes();
         let nextCalled = false;
         const next = () => { nextCalled = true; };
 
         authMiddleware(req, res, next);
         expect(nextCalled).toBe(false);
-        expect(res._redirectUrl).toBe('/login');
+        expect(res._redirectUrl).toBe('/app/login');
     });
 });
 

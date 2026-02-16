@@ -12,8 +12,8 @@ async function request(url, options = {}) {
     ...options
   })
 
-  // Handle 401 — redirect to login
-  if (res.status === 401) {
+  // Handle 401 — redirect to login (skip for auth check endpoints to avoid redirect loops)
+  if (res.status === 401 && !url.startsWith('/auth/')) {
     window.location.href = '/app/login'
     throw new Error('Unauthorized')
   }
@@ -33,6 +33,7 @@ export const api = {
   getUsers: () => request('/users'),
   addUser: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
   updateUser: (id, data) => request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
 
   // ── Trips ──
   getTrips: (params = {}) => {
@@ -70,13 +71,9 @@ export const api = {
   createCategory: (name) => request('/categories', { method: 'POST', body: JSON.stringify({ name }) }),
   deleteCategory: (id) => request(`/categories/${id}`, { method: 'DELETE' }),
 
-  // ── Reports ──
-  getReports: (params = {}) => {
-    const qs = new URLSearchParams(params).toString()
-    return request(`/reports${qs ? '?' + qs : ''}`)
-  },
-  createReport: (data) => request('/reports', { method: 'POST', body: JSON.stringify(data) }),
-
   // ── Dashboard ──
-  getDashboard: () => request('/dashboard')
+  getDashboard: () => request('/dashboard'),
+
+  // ── Analytics ──
+  getAnalytics: () => request('/analytics/data')
 }

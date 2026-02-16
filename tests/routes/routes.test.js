@@ -1,24 +1,16 @@
-hat is /**
+/**
  * Route Integration Tests
  * Tests the update-status routes with mocked req/res using the real database
  */
 const { cleanTestData, createTestUser, createTestTrip, closePool, query } = require('../setup');
 const Trip = require('../../models/tripModel');
-const Report = require('../../models/reportsModel');
 
-let testUser, testTrip, testReport;
+let testUser, testTrip;
 
 beforeAll(async () => {
     await cleanTestData();
     testUser = await createTestUser();
     testTrip = await createTestTrip(testUser.id);
-    testReport = await Report.create({
-        userId: testUser.id,
-        tripId: testTrip.id,
-        reportName: 'TEST_RouteReport',
-        businessPurpose: 'Route testing',
-        duration: { startDate: '2024-01-01', endDate: '2024-01-15' }
-    });
 });
 
 afterAll(async () => {
@@ -42,22 +34,6 @@ describe('Update Status Routes - Trip Status', () => {
     it('should return undefined for non-existent trip', async () => {
         const updated = await Trip.updateStatus(999999, 'approved');
         expect(updated).toBeFalsy();
-    });
-});
-
-describe('Update Status Routes - Report Status', () => {
-    it('should approve report with message', async () => {
-        const updated = await Report.updateStatus(testReport.id, 'approved', 'Approved!');
-        expect(updated).toBeDefined();
-        expect(updated.status).toBe('approved');
-        expect(updated.approval_message).toBe('Approved!');
-    });
-
-    it('should reject report with reason', async () => {
-        const updated = await Report.updateStatus(testReport.id, 'rejected', 'Missing info');
-        expect(updated).toBeDefined();
-        expect(updated.status).toBe('rejected');
-        expect(updated.rejection_reason).toBe('Missing info');
     });
 });
 

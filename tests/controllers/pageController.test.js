@@ -1,6 +1,6 @@
 /**
  * Page Controller Tests
- * Tests page rendering functions (settings, expenses, trips, advances, approvals, etc.)
+ * Tests page redirect functions and addUser
  */
 const { cleanTestData, createTestUser, createTestTrip, closePool } = require('../setup');
 
@@ -21,12 +21,10 @@ function mockRes() {
     const res = {
         _status: 200,
         _json: null,
-        _rendered: null,
         _redirectUrl: null,
         _sent: null,
         status: function (code) { res._status = code; return res; },
         json: function (data) { res._json = data; return res; },
-        render: function (view, data) { res._rendered = { view, data }; },
         redirect: function (url) { res._redirectUrl = url; },
         send: function (data) { res._sent = data; }
     };
@@ -51,91 +49,47 @@ afterAll(async () => {
 
 describe('Page Controller', () => {
     describe('settings()', () => {
-        it('should render settings page with user data', async () => {
-            const req = mockReq({
-                url: '/settings',
-                session: { user: { id: testUser.id } }
-            });
+        it('should redirect to /app/settings', () => {
+            const req = mockReq({ url: '/settings' });
             const res = mockRes();
-            await pageController.settings(req, res);
-            expect(res._rendered.view).toBe('settings');
-            expect(res._rendered.data.email).toBe(testUser.email);
-            expect(res._rendered.data.name).toBeDefined();
-        });
-
-        it('should redirect to /login if user not found', async () => {
-            const req = mockReq({
-                session: { user: { id: 999999 } }
-            });
-            const res = mockRes();
-            await pageController.settings(req, res);
-            expect(res._redirectUrl).toBe('/login');
+            pageController.settings(req, res);
+            expect(res._redirectUrl).toBe('/app/settings');
         });
     });
 
     describe('expenses()', () => {
-        it('should render expenses page with trips for submitter', async () => {
-            const req = mockReq({
-                url: '/expenses',
-                session: { user: { id: testUser.id, role: 'submitter' } }
-            });
+        it('should redirect to /app/expenses', () => {
+            const req = mockReq({ url: '/expenses' });
             const res = mockRes();
-            await pageController.expenses(req, res);
-            expect(res._rendered.view).toBe('expenses');
-            expect(Array.isArray(res._rendered.data.trips)).toBe(true);
-            expect(res._rendered.data.role).toBe('submitter');
-            expect(res._rendered.data.users).toEqual([]);
-        });
-
-        it('should include users list for admin', async () => {
-            const req = mockReq({
-                url: '/expenses',
-                session: { user: { id: testAdminUser.id, role: 'admin' } }
-            });
-            const res = mockRes();
-            await pageController.expenses(req, res);
-            expect(res._rendered.view).toBe('expenses');
-            expect(res._rendered.data.users.length).toBeGreaterThan(0);
+            pageController.expenses(req, res);
+            expect(res._redirectUrl).toBe('/app/expenses');
         });
     });
 
     describe('trips()', () => {
-        it('should render trips page', () => {
-            const req = mockReq({
-                url: '/trips',
-                session: { user: { role: 'submitter' } }
-            });
+        it('should redirect to /app/trips', () => {
+            const req = mockReq({ url: '/trips' });
             const res = mockRes();
             pageController.trips(req, res);
-            expect(res._rendered.view).toBe('trips');
-            expect(res._rendered.data.role).toBe('submitter');
+            expect(res._redirectUrl).toBe('/app/trips');
         });
     });
 
     describe('advances()', () => {
-        it('should render advances page with trips', async () => {
-            const req = mockReq({
-                url: '/advances',
-                session: { user: { id: testUser.id, role: 'submitter' } }
-            });
+        it('should redirect to /app/advances', () => {
+            const req = mockReq({ url: '/advances' });
             const res = mockRes();
-            await pageController.advances(req, res);
-            expect(res._rendered.view).toBe('advances');
-            expect(Array.isArray(res._rendered.data.trips)).toBe(true);
+            pageController.advances(req, res);
+            expect(res._redirectUrl).toBe('/app/advances');
         });
     });
 
     describe('approvals()', () => {
-        it('should render approvals page with pending items', async () => {
-            const req = mockReq({
-                url: '/approvals',
-                session: { user: { role: 'admin' } }
-            });
+        it('should redirect to /app/approvals', () => {
+            const req = mockReq({ url: '/approvals' });
             const res = mockRes();
-            await pageController.approvals(req, res);
-            expect(res._rendered.view).toBe('approvals');
-            expect(res._rendered.data.pendingTrips).toBeDefined();
-            expect(res._rendered.data.pendingReports).toBeDefined();
+            pageController.approvals(req, res);
+            expect(res._redirectUrl).toBe('/app/approvals');
         });
     });
 
@@ -191,42 +145,21 @@ describe('Page Controller', () => {
         });
     });
 
-    describe('addReports()', () => {
-        it('should render addReport page', async () => {
-            const req = mockReq({
-                url: '/reports',
-                session: { user: { id: testUser.id, role: 'submitter' } }
-            });
-            const res = mockRes();
-            await pageController.addReports(req, res);
-            expect(res._rendered.view).toBe('addReport');
-            expect(Array.isArray(res._rendered.data.trips)).toBe(true);
-        });
-    });
-
     describe('viewtrips()', () => {
-        it('should render viewtrips page with trips', async () => {
-            const req = mockReq({
-                url: '/viewtrips',
-                session: { user: { id: testUser.id, role: 'submitter', name: 'Test' } }
-            });
+        it('should redirect to /app/trips', () => {
+            const req = mockReq({ url: '/viewtrips' });
             const res = mockRes();
-            await pageController.viewtrips(req, res);
-            expect(res._rendered.view).toBe('viewtrips');
-            expect(Array.isArray(res._rendered.data.trips)).toBe(true);
+            pageController.viewtrips(req, res);
+            expect(res._redirectUrl).toBe('/app/trips');
         });
     });
 
-    describe('viewreports()', () => {
-        it('should render viewreports page', async () => {
-            const req = mockReq({
-                url: '/viewreports',
-                session: { user: { id: testUser.id, role: 'submitter', name: 'Test' } }
-            });
+    describe('tripDetails()', () => {
+        it('should redirect to /app/trips/:id', () => {
+            const req = mockReq({ params: { tripId: '42' } });
             const res = mockRes();
-            await pageController.viewreports(req, res);
-            expect(res._rendered.view).toBe('viewreports');
-            expect(Array.isArray(res._rendered.data.reports)).toBe(true);
+            pageController.tripDetails(req, res);
+            expect(res._redirectUrl).toBe('/app/trips/42');
         });
     });
 });

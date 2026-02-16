@@ -21,7 +21,6 @@ const routes = [
       { path: 'expenses/new', name: 'NewExpense', component: () => import('@/views/NewExpenseView.vue') },
       { path: 'advances', name: 'Advances', component: () => import('@/views/AdvancesView.vue') },
       { path: 'advances/new', name: 'NewAdvance', component: () => import('@/views/NewAdvanceView.vue') },
-      { path: 'reports', name: 'Reports', component: () => import('@/views/ReportsView.vue') },
       { path: 'approvals', name: 'Approvals', component: () => import('@/views/ApprovalsView.vue'), meta: { adminOnly: true } },
       { path: 'analytics', name: 'Analytics', component: () => import('@/views/AnalyticsView.vue') },
       { path: 'settings', name: 'Settings', component: () => import('@/views/SettingsView.vue') }

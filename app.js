@@ -28,7 +28,6 @@ const { pool } = require('./config/database');
     // Middleware
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
-    app.set('view engine', 'ejs');
     app.use(cookieParser());
 
     // Serve static files first
@@ -48,9 +47,9 @@ const { pool } = require('./config/database');
 
     // Routes
     app.use('/api', apiRoutes);
+    app.use('/api/analytics', analyticsRoutes); // Mount analytics under /api
     app.use('/', authRoutes);
     app.use('/ajax', ajaxRoutes);
-    app.use('/analytics', analyticsRoutes); // Use the analytics routes
 
     // Route to fetch trips for a selected user (only for admins)
     app.get('/trips/:userId', async (req, res) => {
@@ -143,12 +142,16 @@ app.get('/file/:fileId', async (req, res) => {
         }
     });
     
-    // Serve Vue.js frontend build (production)
+    // Serve Vue.js frontend build
     const vueBuildPath = path.join(__dirname, 'frontend', 'dist');
     if (require('fs').existsSync(vueBuildPath)) {
         app.use(express.static(vueBuildPath));
-        // SPA fallback - serve index.html for any non-API routes
-        app.get(/^\/app(\/.*)?$/, (req, res) => {
+        // SPA fallback - serve index.html for any non-API/non-ajax/non-file routes
+        app.get('*', (req, res, next) => {
+            // Skip API, ajax, and file routes
+            if (req.originalUrl.startsWith('/api/') || req.originalUrl.startsWith('/ajax/') || req.originalUrl.startsWith('/file/')) {
+                return next();
+            }
             res.sendFile(path.join(vueBuildPath, 'index.html'));
         });
     }
