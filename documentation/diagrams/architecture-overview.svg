@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .box-title { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .box-text { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #1e293b; }
+      .label { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .small { font: 500 12px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .card { stroke: #94a3b8; stroke-width: 2; rx: 14; ry: 14; }
+      .line { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .line2 { stroke: #475569; stroke-width: 2; fill: none; marker-end: url(#arrow2); stroke-dasharray: 8 6; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155" />
+    </marker>
+    <marker id="arrow2" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="980" fill="#f8fafc" />
+  <text x="60" y="62" class="title">Expense Tracker - Runtime Architecture</text>
+  <text x="60" y="92" class="subtitle">Express + PostgreSQL backend serving a Vue 3 SPA and JSON APIs</text>
+
+  <rect x="60" y="150" width="330" height="210" class="card" fill="#dbeafe" />
+  <text x="84" y="185" class="box-title">Client Layer</text>
+  <text x="84" y="216" class="box-text">Browser (desktop/mobile)</text>
+  <text x="84" y="242" class="box-text">Vue 3 SPA in frontend/dist</text>
+  <text x="84" y="268" class="box-text">Pinia stores + Vue Router</text>
+  <text x="84" y="294" class="box-text">Fetch API with credentials: include</text>
+  <text x="84" y="320" class="box-text">Charts via Chart.js</text>
+
+  <rect x="460" y="130" width="480" height="260" class="card" fill="#dcfce7" />
+  <text x="486" y="165" class="box-title">HTTP Application Layer (app.js)</text>
+  <text x="486" y="196" class="box-text">Express middleware: JSON, urlencoded, cookies, static</text>
+  <text x="486" y="222" class="box-text">Session store: connect-pg-simple -> sessions table</text>
+  <text x="486" y="248" class="box-text">Route mounting:</text>
+  <text x="518" y="272" class="box-text">/api -> routes/apiRoutes.js</text>
+  <text x="518" y="296" class="box-text">/api/analytics -> routes/analytics.js</text>
+  <text x="518" y="320" class="box-text">/ + /ajax -> auth/page/ajax controllers</text>
+  <text x="486" y="350" class="box-text">File endpoints: /upload-receipts, /file/:id</text>
+
+  <rect x="1010" y="150" width="530" height="210" class="card" fill="#fee2e2" />
+  <text x="1036" y="185" class="box-title">Data Layer (PostgreSQL)</text>
+  <text x="1036" y="216" class="box-text">Connection pool in config/database.js</text>
+  <text x="1036" y="242" class="box-text">Core tables: users, trips, trip_users, expenses, advances</text>
+  <text x="1036" y="268" class="box-text">Receipts in BYTEA (receipts table)</text>
+  <text x="1036" y="294" class="box-text">Itinerary tables: flights, buses, trains, cabs</text>
+  <text x="1036" y="320" class="box-text">Sessions persisted for auth continuity</text>
+
+  <rect x="460" y="450" width="500" height="430" class="card" fill="#ede9fe" />
+  <text x="486" y="486" class="box-title">Domain / Business Layer</text>
+  <text x="486" y="518" class="box-text">Controllers</text>
+  <text x="520" y="542" class="box-text">authController, ajaxController, pageController</text>
+  <text x="520" y="566" class="box-text">analyticsHelper for aggregations</text>
+  <text x="486" y="602" class="box-text">Models</text>
+  <text x="520" y="626" class="box-text">userModel, tripModel, expenseModel, advancesModel, categoryModel</text>
+  <text x="520" y="650" class="box-text">Transaction support for trip creation and expense+receipts</text>
+  <text x="486" y="686" class="box-text">Workflow Rules</text>
+  <text x="520" y="710" class="box-text">Trips: pending -> approved/rejected -> finished</text>
+  <text x="520" y="734" class="box-text">Expenses/Advances only allowed on approved, non-finished trips</text>
+  <text x="520" y="758" class="box-text">Approvals and rejection reasons tracked per record</text>
+  <text x="520" y="782" class="box-text">Role checks: submitter/approver/admin</text>
+
+  <rect x="1010" y="450" width="530" height="430" class="card" fill="#fef3c7" />
+  <text x="1036" y="486" class="box-title">Frontend App Modules (Vue)</text>
+  <text x="1036" y="518" class="box-text">Views: Dashboard, Trips, Trip Details, Expenses, Advances</text>
+  <text x="1036" y="542" class="box-text">Views: Approvals, Analytics, Settings, New* forms, Login</text>
+  <text x="1036" y="578" class="box-text">Stores: auth, trips, expenses, advances, categories</text>
+  <text x="1036" y="604" class="box-text">Router guards enforce auth + adminOnly routes</text>
+  <text x="1036" y="630" class="box-text">API wrapper centralizes error handling and 401 redirect</text>
+  <text x="1036" y="656" class="box-text">Reusable components: DataTable, StatusBadge, Modals, Toasts</text>
+  <text x="1036" y="692" class="box-text">User journeys:</text>
+  <text x="1070" y="716" class="box-text">1) Create trip -> 2) Approve trip -> 3) Add expense/advance</text>
+  <text x="1070" y="740" class="box-text">4) Approve or reject submissions -> 5) Finish trip</text>
+  <text x="1070" y="764" class="box-text">6) Analytics and settings management</text>
+
+  <path d="M390 255 L450 255" class="line" />
+  <path d="M940 255 L1000 255" class="line" />
+  <path d="M700 390 L700 438" class="line2" />
+  <path d="M1180 390 L1180 438" class="line2" />
+  <path d="M960 670 L1000 670" class="line" />
+
+  <rect x="60" y="430" width="330" height="200" class="card" fill="#e0f2fe" />
+  <text x="84" y="465" class="box-title">Session + Security Notes</text>
+  <text x="84" y="494" class="box-text">Cookie-backed auth via express-session</text>
+  <text x="84" y="518" class="box-text">Server-side session state in PostgreSQL</text>
+  <text x="84" y="542" class="box-text">Passwords hashed with bcrypt</text>
+  <text x="84" y="566" class="box-text">Parameterized SQL queries prevent injection</text>
+  <text x="84" y="590" class="box-text">Role-guarded endpoints for admin operations</text>
+
+  <path d="M390 520 L450 580" class="line2" />
+
+  <text x="60" y="936" class="label">Legend:</text>
+  <text x="120" y="936" class="small">Solid arrows = request/response flow, dashed arrows = internal coordination or lifecycle flow</text>
+</svg>

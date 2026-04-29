@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1180" viewBox="0 0 1900 1180">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 17px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .table { fill: #ffffff; stroke: #64748b; stroke-width: 2; rx: 12; ry: 12; }
+      .head { fill: #e2e8f0; }
+      .name { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .col { font: 500 13px 'Consolas', 'Courier New', monospace; fill: #1e293b; }
+      .pk { font: 700 13px 'Consolas', 'Courier New', monospace; fill: #1d4ed8; }
+      .fk { font: 700 13px 'Consolas', 'Courier New', monospace; fill: #b45309; }
+      .rel { stroke: #334155; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+      .legend { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+    </style>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#334155" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1900" height="1180" />
+  <text x="60" y="62" class="title">Expense Tracker - Entity Relationship Diagram</text>
+  <text x="60" y="92" class="subtitle">Current PostgreSQL model used by app.js, models/*, and API routes</text>
+
+  <!-- users -->
+  <rect x="70" y="150" width="320" height="280" class="table" />
+  <rect x="70" y="150" width="320" height="40" class="head" />
+  <text x="90" y="176" class="name">users</text>
+  <text x="90" y="210" class="pk">PK id</text>
+  <text x="90" y="232" class="col">name, email, password</text>
+  <text x="90" y="254" class="col">designation, employee_id</text>
+  <text x="90" y="276" class="col">mobile, department, role</text>
+  <text x="90" y="298" class="col">created_at, updated_at</text>
+
+  <!-- categories -->
+  <rect x="70" y="490" width="320" height="190" class="table" />
+  <rect x="70" y="490" width="320" height="40" class="head" />
+  <text x="90" y="516" class="name">categories</text>
+  <text x="90" y="550" class="pk">PK id</text>
+  <text x="90" y="572" class="col">name, description</text>
+  <text x="90" y="594" class="col">created_at, updated_at</text>
+
+  <!-- trips -->
+  <rect x="470" y="150" width="330" height="240" class="table" />
+  <rect x="470" y="150" width="330" height="40" class="head" />
+  <text x="490" y="176" class="name">trips</text>
+  <text x="490" y="210" class="pk">PK id</text>
+  <text x="490" y="232" class="col">trip_name, travel_type</text>
+  <text x="490" y="254" class="col">status, description</text>
+  <text x="490" y="276" class="col">created_at, updated_at</text>
+
+  <!-- trip_users -->
+  <rect x="470" y="430" width="330" height="190" class="table" />
+  <rect x="470" y="430" width="330" height="40" class="head" />
+  <text x="490" y="456" class="name">trip_users</text>
+  <text x="490" y="490" class="fk">FK trip_id -> trips.id</text>
+  <text x="490" y="512" class="fk">FK user_id -> users.id</text>
+  <text x="490" y="534" class="col">PK (trip_id, user_id)</text>
+  <text x="490" y="556" class="col">created_at</text>
+
+  <!-- expenses -->
+  <rect x="890" y="150" width="390" height="300" class="table" />
+  <rect x="890" y="150" width="390" height="40" class="head" />
+  <text x="910" y="176" class="name">expenses</text>
+  <text x="910" y="210" class="pk">PK id</text>
+  <text x="910" y="232" class="fk">FK user_id -> users.id</text>
+  <text x="910" y="254" class="fk">FK trip_id -> trips.id</text>
+  <text x="910" y="276" class="fk">FK category_id -> categories.id</text>
+  <text x="910" y="298" class="fk">FK approved_by -> users.id</text>
+  <text x="910" y="320" class="col">expense_title, amount, currency</text>
+  <text x="910" y="342" class="col">status, rejection_reason, approved_at</text>
+  <text x="910" y="364" class="col">description, date, created_at, updated_at</text>
+
+  <!-- advances -->
+  <rect x="890" y="500" width="390" height="260" class="table" />
+  <rect x="890" y="500" width="390" height="40" class="head" />
+  <text x="910" y="526" class="name">advances</text>
+  <text x="910" y="560" class="pk">PK id</text>
+  <text x="910" y="582" class="fk">FK user_id -> users.id</text>
+  <text x="910" y="604" class="fk">FK trip_id -> trips.id</text>
+  <text x="910" y="626" class="fk">FK approved_by -> users.id</text>
+  <text x="910" y="648" class="col">amount, currency, paid_through</text>
+  <text x="910" y="670" class="col">reference_id, notes, status</text>
+  <text x="910" y="692" class="col">rejection_reason, approved_at</text>
+
+  <!-- receipts -->
+  <rect x="1360" y="150" width="420" height="230" class="table" />
+  <rect x="1360" y="150" width="420" height="40" class="head" />
+  <text x="1380" y="176" class="name">receipts</text>
+  <text x="1380" y="210" class="pk">PK id</text>
+  <text x="1380" y="232" class="fk">FK expense_id -> expenses.id</text>
+  <text x="1380" y="254" class="col">filename, original_filename</text>
+  <text x="1380" y="276" class="col">content_type, file_size, file_data(BYTEA)</text>
+  <text x="1380" y="298" class="col">created_at</text>
+
+  <!-- sessions -->
+  <rect x="1360" y="460" width="420" height="170" class="table" />
+  <rect x="1360" y="460" width="420" height="40" class="head" />
+  <text x="1380" y="486" class="name">sessions</text>
+  <text x="1380" y="520" class="pk">PK sid</text>
+  <text x="1380" y="542" class="col">sess (JSON)</text>
+  <text x="1380" y="564" class="col">expire</text>
+
+  <!-- itinerary child tables -->
+  <rect x="470" y="700" width="270" height="170" class="table" />
+  <rect x="470" y="700" width="270" height="40" class="head" />
+  <text x="490" y="726" class="name">flights</text>
+  <text x="490" y="760" class="pk">PK id</text>
+  <text x="490" y="782" class="fk">FK trip_id -> trips.id</text>
+  <text x="490" y="804" class="col">depart_from, arrive_at</text>
+  <text x="490" y="826" class="col">departure_date, return_date</text>
+
+  <rect x="760" y="700" width="250" height="170" class="table" />
+  <rect x="760" y="700" width="250" height="40" class="head" />
+  <text x="780" y="726" class="name">buses</text>
+  <text x="780" y="760" class="pk">PK id</text>
+  <text x="780" y="782" class="fk">FK trip_id -> trips.id</text>
+  <text x="780" y="804" class="col">depart_from, arrive_at</text>
+  <text x="780" y="826" class="col">departure_date</text>
+
+  <rect x="1030" y="700" width="250" height="170" class="table" />
+  <rect x="1030" y="700" width="250" height="40" class="head" />
+  <text x="1050" y="726" class="name">trains</text>
+  <text x="1050" y="760" class="pk">PK id</text>
+  <text x="1050" y="782" class="fk">FK trip_id -> trips.id</text>
+  <text x="1050" y="804" class="col">depart_from, arrive_at</text>
+  <text x="1050" y="826" class="col">departure_date</text>
+
+  <rect x="1300" y="700" width="260" height="170" class="table" />
+  <rect x="1300" y="700" width="260" height="40" class="head" />
+  <text x="1320" y="726" class="name">cabs</text>
+  <text x="1320" y="760" class="pk">PK id</text>
+  <text x="1320" y="782" class="fk">FK trip_id -> trips.id</text>
+  <text x="1320" y="804" class="col">pick_up_location, drop_off_location</text>
+  <text x="1320" y="826" class="col">pick_up_date</text>
+
+  <!-- Relations -->
+  <path d="M390 250 L460 250" class="rel" />
+  <path d="M390 300 L880 270" class="rel" />
+  <path d="M390 560 L880 280" class="rel" />
+  <path d="M390 300 L880 600" class="rel" />
+  <path d="M800 250 L880 250" class="rel" />
+  <path d="M800 520 L880 620" class="rel" />
+  <path d="M1280 260 L1350 250" class="rel" />
+  <path d="M620 390 L620 420" class="rel" />
+
+  <path d="M620 390 L605 690" class="rel" />
+  <path d="M640 390 L885 690" class="rel" />
+  <path d="M660 390 L1135 690" class="rel" />
+  <path d="M680 390 L1430 690" class="rel" />
+
+  <!-- legend -->
+  <rect x="70" y="930" width="1710" height="180" class="table" />
+  <text x="95" y="962" class="name">Legend and Notes</text>
+  <text x="95" y="992" class="legend">PK = Primary Key, FK = Foreign Key, all FK constraints use referential integrity in PostgreSQL.</text>
+  <text x="95" y="1018" class="legend">Trip membership is many-to-many via trip_users. Receipts are 1-to-many from expenses and stored as BYTEA.</text>
+  <text x="95" y="1044" class="legend">Approval workflow fields (status, approved_by, approved_at, rejection_reason) are present on expenses and advances.</text>
+  <text x="95" y="1070" class="legend">Sessions table is used by connect-pg-simple for Express session persistence and is not directly joined with domain tables.</text>
+</svg>
